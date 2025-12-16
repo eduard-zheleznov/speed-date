@@ -33,7 +33,7 @@ async def get_my_subscription_status(user_id: str = Depends(get_current_user_id)
     # Calculate when it resets (midnight UTC)
     tomorrow = datetime.now(timezone.utc).date()
     tomorrow = datetime.combine(tomorrow, datetime.min.time()).replace(tzinfo=timezone.utc)
-    resets_at = (tomorrow.replace(hour=0, minute=0, second=0, microsecond=0) + timezone.timedelta(days=1)).isoformat()
+    resets_at = (tomorrow.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)).isoformat()
     
     return CommunicationsStatus(
         remaining_free=remaining_free,
