@@ -1,0 +1,237 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import NavigationBar from '../components/NavigationBar';
+import VideoWindow from '../components/VideoWindow';
+import DecisionModal from '../components/modals/DecisionModal';
+import FilterModal from '../components/modals/FilterModal';
+import ComplaintModal from '../components/modals/ComplaintModal';
+import { Button } from '../components/ui/button';
+import { toast } from 'sonner';
+import api from '../lib/api';
+
+const VideoChat = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [matchUser, setMatchUser] = useState(null);
+  const [session, setSession] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
+  const [showDecision, setShowDecision] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [showComplaint, setShowComplaint] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    if (!user?.profile_completed) {
+      navigate('/complete-profile');
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (session && timeLeft > 0) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            handleTimeEnd();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [session, timeLeft]);
+
+  const findMatch = async () => {
+    setSearching(true);
+    try {
+      const response = await api.post('/matching/find-match');
+      setMatchUser(response.data);
+      
+      // Start video session
+      const sessionResponse = await api.post('/matching/video-session', {
+        match_user_id: response.data.id
+      });
+      setSession(sessionResponse.data);
+      setTimeLeft(600);
+      
+      toast.success('Собеседник найден!');
+    } catch (error) {
+      if (error.response?.status === 404) {
+        toast.error('Собеседник не найден - измените критерии');
+      } else if (error.response?.status === 403) {
+        toast.error('У вас закончились бесплатные общения на сегодня');
+        navigate('/subscriptions');
+      } else {
+        toast.error(error.response?.data?.detail || 'Ошибка поиска');
+      }
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const handleTimeEnd = async () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    
+    try {
+      await api.put(`/matching/video-session/${session.id}/end`);
+    } catch (error) {
+      console.error('Error ending session:', error);
+    }
+    
+    setShowDecision(true);
+  };
+
+  const handleEndChat = async () => {
+    if (!session) return;
+    
+    try {
+      await api.put(`/matching/video-session/${session.id}/end`);
+      setShowDecision(true);
+    } catch (error) {
+      toast.error('Ошибка завершения чата');
+    }
+  };
+
+  const handleDecision = async (accepted) => {
+    try {
+      const response = await api.post('/matching/decision', {
+        session_id: session.id,
+        accepted
+      });
+
+      if (response.data.matched) {
+        toast.success('Взаимная симпатия! Чат открыт');
+        navigate(`/chat/${response.data.match_id}`);
+      } else if (!accepted) {
+        setShowComplaint(true);
+      } else {
+        toast.info('Ожидаем решения собеседника...');
+        // Poll for result
+        setTimeout(() => checkMatchResult(), 2000);
+      }
+    } catch (error) {
+      toast.error('Ошибка обработки решения');
+    }
+    
+    setShowDecision(false);
+  };
+
+  const checkMatchResult = async () => {
+    // In real app, use WebSocket for real-time updates
+    toast.info('Собеседник не заинтересован');
+    resetChat();
+  };
+
+  const resetChat = () => {
+    setMatchUser(null);
+    setSession(null);
+    setTimeLeft(600);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col">
+      <NavigationBar />
+      
+      <div className="flex-1 flex flex-col items-center justify-center p-4" data-testid="videochat-container">
+        {!session ? (
+          <div className="w-full max-w-4xl space-y-6">
+            <div className="bg-[#F6F7F9] rounded-3xl p-8 aspect-video flex items-center justify-center">
+              <p className="text-[#7A7A7A] text-lg text-center">
+                Нажмите "Знакомиться" чтобы начать видео-знакомство
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center gap-4">
+              <button
+                onClick={() => setShowFilters(true)}
+                className="text-[#1A73E8] font-medium hover:underline"
+                data-testid="filters-button"
+              >
+                Фильтры
+              </button>
+
+              <Button
+                onClick={findMatch}
+                disabled={searching}
+                className="w-full max-w-md py-6 rounded-full text-white font-semibold text-lg"
+                style={{ background: 'linear-gradient(135deg, #34C759 0%, #5DD97C 100%)' }}
+                data-testid="find-match-button"
+              >
+                {searching ? 'Поиск...' : 'ЗНАКОМИТЬСЯ'}
+              </Button>
+
+              <p className="text-[#FF5757] text-sm text-center">
+                * собеседник не найден - измените критерии
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full max-w-4xl space-y-4">
+            <div className="relative">
+              <VideoWindow
+                session={session}
+                matchUser={matchUser}
+                userId={user.id}
+              />
+              
+              <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white px-4 py-2 rounded-full font-mono text-lg" data-testid="timer">
+                {formatTime(timeLeft)}
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <Button
+                onClick={handleEndChat}
+                variant="destructive"
+                className="px-8 py-3 rounded-full"
+                data-testid="end-chat-button"
+              >
+                Завершить чат
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <DecisionModal
+        isOpen={showDecision}
+        onClose={() => setShowDecision(false)}
+        onDecision={handleDecision}
+      />
+
+      <FilterModal
+        isOpen={showFilters}
+        onClose={() => setShowFilters(false)}
+      />
+
+      <ComplaintModal
+        isOpen={showComplaint}
+        onClose={() => {
+          setShowComplaint(false);
+          resetChat();
+        }}
+        reportedUserId={matchUser?.id}
+      />
+    </div>
+  );
+};
+
+export default VideoChat;
