@@ -191,6 +191,15 @@ const VideoChat = () => {
               <p className="text-[#FF5757] text-sm text-center">
                 * собеседник не найден - измените критерии
               </p>
+              
+              <Button
+                onClick={createDemoMatch}
+                variant="outline"
+                className="px-8 py-3 rounded-full"
+                data-testid="create-demo-match-button"
+              >
+                Создать демо-матч для тестирования
+              </Button>
             </div>
           </div>
         ) : (
