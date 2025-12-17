@@ -88,10 +88,62 @@ const Profile = () => {
           </div>
 
           <div className="space-y-6">
-            {/* Profile Picture Placeholder */}
-            <div className="flex justify-center">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#7B61FF] to-[#E056FD] flex items-center justify-center text-white text-5xl font-bold">
-                {user?.name?.[0]}
+            {/* Profile Photos */}
+            <div>
+              <Label className="text-lg font-semibold mb-4 block">Фото профиля</Label>
+              <p className="text-sm text-[#7A7A7A] mb-4">
+                Загрузите до 3 фотографий. Первая будет главной (аватар).
+              </p>
+              
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                {user?.photos?.map((photo, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={photo}
+                      alt={`Photo ${index + 1}`}
+                      className="w-full aspect-square object-cover rounded-xl border-2 border-[#E5E5E5]"
+                    />
+                    {index === 0 && (
+                      <div className="absolute top-2 left-2 bg-[#1A73E8] text-white text-xs px-2 py-1 rounded-full">
+                        Главное
+                      </div>
+                    )}
+                    {editing && (
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center gap-2">
+                        {index !== 0 && (
+                          <button
+                            onClick={() => handleSetMainPhoto(index)}
+                            className="bg-[#1A73E8] text-white text-xs px-3 py-1 rounded-full"
+                          >
+                            Сделать главным
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeletePhoto(index)}
+                          className="bg-red-500 text-white text-xs px-3 py-1 rounded-full"
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                
+                {(!user?.photos || user.photos.length < 3) && editing && (
+                  <label className="w-full aspect-square border-2 border-dashed border-[#E5E5E5] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[#1A73E8] hover:bg-[#F6F7F9] transition-all">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUploadPhoto}
+                      className="hidden"
+                      data-testid="upload-photo-input"
+                    />
+                    <svg className="w-8 h-8 text-[#9AA0A6] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span className="text-sm text-[#7A7A7A]">Загрузить</span>
+                  </label>
+                )}
               </div>
             </div>
 
