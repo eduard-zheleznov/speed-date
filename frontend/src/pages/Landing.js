@@ -15,7 +15,13 @@ const Landing = () => {
 
   React.useEffect(() => {
     if (isAuthenticated) {
-      navigate('/videochat');
+      // Check if user is admin and redirect to admin panel
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      if (userData?.email?.includes('admin')) {
+        navigate('/admin');
+      } else {
+        navigate('/videochat');
+      }
     }
   }, [isAuthenticated, navigate]);
 
