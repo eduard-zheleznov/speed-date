@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import NavigationBar from '../components/NavigationBar';
-import VideoWindow from '../components/VideoWindow';
+import VideoChatSimulator from '../components/VideoChatSimulator';
 import DecisionModal from '../components/modals/DecisionModal';
 import FilterModal from '../components/modals/FilterModal';
 import ComplaintModal from '../components/modals/ComplaintModal';
