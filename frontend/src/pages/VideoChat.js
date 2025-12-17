@@ -194,20 +194,19 @@ const VideoChat = () => {
             </div>
           </div>
         ) : (
-          <div className="w-full max-w-4xl space-y-4">
+          <div className="w-full max-w-4xl space-y-6">
             <div className="relative">
-              <VideoWindow
-                session={session}
+              <VideoChatSimulator
                 matchUser={matchUser}
-                userId={user.id}
+                onTimeEnd={handleTimeEnd}
               />
               
-              <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white px-4 py-2 rounded-full font-mono text-lg" data-testid="timer">
+              <div className="absolute top-4 right-4 bg-black/75 backdrop-blur-sm text-white px-6 py-3 rounded-full font-mono text-2xl font-bold shadow-xl" data-testid="timer">
                 {formatTime(timeLeft)}
               </div>
             </div>
 
-            <div className="flex justify-center">
+            <div className="flex justify-center gap-4">
               <Button
                 onClick={handleEndChat}
                 variant="destructive"
@@ -215,6 +214,15 @@ const VideoChat = () => {
                 data-testid="end-chat-button"
               >
                 Завершить чат
+              </Button>
+              
+              <Button
+                onClick={createDemoMatch}
+                variant="outline"
+                className="px-8 py-3 rounded-full"
+                data-testid="create-demo-match-button"
+              >
+                Создать демо-матч для тестирования
               </Button>
             </div>
           </div>
