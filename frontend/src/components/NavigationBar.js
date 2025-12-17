@@ -10,12 +10,16 @@ const NavigationBar = () => {
   
   const isAdmin = user?.email?.includes('admin');
 
-  const navItems = [
+  const baseNavItems = [
     { icon: Video, path: '/videochat', label: 'Видеочат', testId: 'nav-videochat' },
     { icon: MessageCircle, path: '/matches', label: 'Чаты', testId: 'nav-matches' },
     { icon: User, path: '/profile', label: 'Профиль', testId: 'nav-profile' },
     { icon: Star, path: '/subscriptions', label: 'Подписка', testId: 'nav-subscriptions' }
   ];
+  
+  const navItems = isAdmin 
+    ? [...baseNavItems, { icon: Shield, path: '/admin', label: 'Админ', testId: 'nav-admin' }]
+    : baseNavItems;
 
   return (
     <nav className="bg-white border-b border-[#E5E5E5]" data-testid="navigation-bar">
