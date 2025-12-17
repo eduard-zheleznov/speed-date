@@ -182,10 +182,17 @@ const Landing = () => {
           </div>
         </div>
 
-        {/* Trust Badge */}
-        <div className="mt-16 flex items-center gap-3 px-6 py-3 rounded-full bg-white/60 backdrop-blur-sm border border-[#E5E5E5] animate-fadeIn" style={{ animationDelay: '1.2s' }}>
-          <Lock className="w-5 h-5 text-[#34C759]" />
-          <span className="text-sm text-[#7A7A7A]">Безопасный сервис · Проверка 18+ · Конфиденциальность</span>
+        {/* Start Button */}
+        <div className="mt-16 animate-fadeIn" style={{ animationDelay: '1.2s' }}>
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="group relative px-12 py-4 rounded-full font-semibold text-lg text-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+            style={{ background: 'linear-gradient(135deg, #1A73E8 0%, #6A9EFF 100%)' }}
+            data-testid="start-dating-button"
+          >
+            <span className="relative z-10">Начать знакомиться</span>
+            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+          </button>
         </div>
       </div>
 
