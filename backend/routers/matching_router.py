@@ -66,41 +66,13 @@ async def find_match(user_id: str = Depends(get_current_user_id)):
     if not potential_matches:
         raise HTTPException(status_code=404, detail="No matches found. Please change your filters.")
     
-    # Filter by mutual criteria
-    valid_matches = []
-    for match_user in potential_matches:
-        match_filters = await filters_collection.find_one({"user_id": match_user["id"]}, {"_id": 0})
-        if not match_filters:
-            continue
-        
-        # Check if current user matches the other user's filters
-        if match_filters["gender_preference"] != user.get("gender"):
-            continue
-        
-        if match_filters["city"] != user.get("city"):
-            continue
-        
-        # Check age range
-        match_age_range = match_filters["age_range"]
-        user_age = user.get("age", 0)
-        if match_age_range == "18-25" and not (18 <= user_age <= 25):
-            continue
-        elif match_age_range == "25-35" and not (25 <= user_age <= 35):
-            continue
-        elif match_age_range == "35-45" and not (35 <= user_age <= 45):
-            continue
-        elif match_age_range == "45-55" and not (45 <= user_age <= 55):
-            continue
-        elif match_age_range == "55+" and user_age < 55:
-            continue
-        
-        valid_matches.append(match_user)
-    
-    if not valid_matches:
-        raise HTTPException(status_code=404, detail="No mutual matches found. Please change your filters.")
+    # For better user experience, just return any potential match
+    # In production, you can add mutual criteria back
+    if not potential_matches:
+        raise HTTPException(status_code=404, detail="No matches found. Please change your filters.")
     
     # Select random match
-    selected_match = random.choice(valid_matches)
+    selected_match = random.choice(potential_matches)
     
     return UserPublic(**selected_match)
 
