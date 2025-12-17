@@ -59,7 +59,7 @@ const VideoChat = () => {
         match_user_id: response.data.id
       });
       setSession(sessionResponse.data);
-      setTimeLeft(600);
+      setTimeLeft(60); // 1 минута для демонстрации
       
       toast.success('Собеседник найден!');
     } catch (error) {
@@ -73,6 +73,16 @@ const VideoChat = () => {
       }
     } finally {
       setSearching(false);
+    }
+  };
+
+  const createDemoMatch = async () => {
+    try {
+      const response = await api.post('/testing/create-demo-match');
+      toast.success(`Демо-матч создан с ${response.data.partner_name}`);
+      navigate('/matches');
+    } catch (error) {
+      toast.error('Ошибка создания демо-матча');
     }
   };
 
