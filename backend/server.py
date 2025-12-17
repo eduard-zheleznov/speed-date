@@ -49,6 +49,7 @@ api_router.include_router(chat_router)
 api_router.include_router(complaints_router)
 api_router.include_router(subscriptions_router)
 api_router.include_router(admin_router)
+api_router.include_router(testing_router)
 
 app.include_router(api_router)
 
