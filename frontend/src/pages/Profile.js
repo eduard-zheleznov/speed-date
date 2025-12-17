@@ -68,6 +68,49 @@ const Profile = () => {
     }
   };
 
+  const handleUploadPhoto = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Файл слишком большой (макс 5МБ)');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await api.post('/profile/upload-photo', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      updateUser({ ...user, photos: response.data.photos });
+      toast.success('Фото загружено');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Ошибка загрузки');
+    }
+  };
+
+  const handleDeletePhoto = async (index) => {
+    try {
+      const response = await api.delete(`/profile/photo/${index}`);
+      updateUser({ ...user, photos: response.data.photos });
+      toast.success('Фото удалено');
+    } catch (error) {
+      toast.error('Ошибка удаления');
+    }
+  };
+
+  const handleSetMainPhoto = async (index) => {
+    try {
+      const response = await api.post(`/profile/set-main-photo?photo_index=${index}`);
+      updateUser({ ...user, photos: response.data.photos });
+      toast.success('Главное фото обновлено');
+    } catch (error) {
+      toast.error('Ошибка');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <NavigationBar />
