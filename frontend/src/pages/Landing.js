@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import LoginModal from '../components/modals/LoginModal';
 import RegisterModal from '../components/modals/RegisterModal';
 import ForgotPasswordModal from '../components/modals/ForgotPasswordModal';
+import { Video, Users, Shield, Heart, MessageCircle, Lock } from 'lucide-react';
 
 const Landing = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -20,80 +21,171 @@ const Landing = () => {
 
   const features = [
     {
+      icon: Video,
       title: 'Быстрые знакомства',
-      items: ['Видео звонки в реальном времени', 'Мгновенные совпадения', 'Удобный интерфейс']
+      items: ['Видео звонки в реальном времени', 'Мгновенные совпадения', 'Удобный интерфейс'],
+      gradient: 'from-[#FF6B6B] to-[#FF8E8E]'
     },
     {
+      icon: Users,
       title: 'Умные фильтры',
-      items: ['Выбор возраста и пола', 'Фильтр по городу', 'Личные предпочтения']
+      items: ['Выбор возраста и пола', 'Фильтр по городу', 'Личные предпочтения'],
+      gradient: 'from-[#4ECDC4] to-[#44A19B]'
     },
     {
+      icon: Shield,
       title: 'Безопасность',
-      items: ['Проверка возраста 18+', 'Система жалоб', 'Модерация контента']
+      items: ['Проверка возраста 18+', 'Система жалоб', 'Модерация контента'],
+      gradient: 'from-[#FFD93D] to-[#F5C042]'
     }
   ];
 
+  const floatingShapes = [
+    { icon: Heart, delay: 0, duration: 20 },
+    { icon: MessageCircle, delay: 5, duration: 25 },
+    { icon: Video, delay: 10, duration: 22 },
+    { icon: Users, delay: 3, duration: 18 }
+  ];
+
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#1F1F1F] text-center mb-8" style={{ fontFamily: 'Manrope, sans-serif' }}>
-          СЕРВИС БЫСТРЫХ<br />ВИДЕОСВИДАНИЙ
-        </h1>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#F8F9FA] via-white to-[#F0F4FF]">
+        <div className="absolute inset-0 opacity-30">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-gradient-to-br from-[#1A73E8]/10 to-[#E056FD]/10"
+              style={{
+                width: `${Math.random() * 300 + 50}px`,
+                height: `${Math.random() * 300 + 50}px`,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animation: `float ${Math.random() * 10 + 10}s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 5}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Floating Icons */}
+      {floatingShapes.map((shape, index) => {
+        const IconComponent = shape.icon;
+        return (
+          <div
+            key={index}
+            className="absolute opacity-10"
+            style={{
+              left: `${(index * 25) % 100}%`,
+              animation: `floatUpDown ${shape.duration}s ease-in-out infinite`,
+              animationDelay: `${shape.delay}s`
+            }}
+          >
+            <IconComponent className="w-16 h-16 text-[#1A73E8]" />
+          </div>
+        );
+      })}
+
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-12 animate-fadeIn">
+        {/* Logo/Title with animation */}
+        <div className="mb-8 animate-slideDown">
+          <div className="flex items-center justify-center mb-4">
+            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#1A73E8] to-[#7B61FF] flex items-center justify-center shadow-2xl animate-pulse">
+              <Heart className="w-10 h-10 text-white" />
+            </div>
+          </div>
+          
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-center mb-4 animate-slideUp" style={{ fontFamily: 'Manrope, sans-serif' }}>
+            <span className="bg-gradient-to-r from-[#1A73E8] via-[#7B61FF] to-[#E056FD] text-transparent bg-clip-text">
+              СЕРВИС БЫСТРЫХ
+            </span>
+            <br />
+            <span className="bg-gradient-to-r from-[#E056FD] via-[#7B61FF] to-[#1A73E8] text-transparent bg-clip-text">
+              ВИДЕОСВИДАНИЙ
+            </span>
+          </h1>
+          
+          <p className="text-center text-[#7A7A7A] text-lg max-w-2xl mx-auto animate-fadeIn" style={{ animationDelay: '0.3s' }}>
+            Знакомьтесь с интересными людьми через видеочат. Быстро, безопасно, удобно.
+          </p>
+        </div>
         
-        <div className="flex flex-col gap-4 mb-12 w-full max-w-sm">
+        <div className="flex flex-col gap-4 mb-16 w-full max-w-sm animate-slideUp" style={{ animationDelay: '0.5s' }}>
           <button
             onClick={() => setShowRegister(true)}
-            className="w-full py-4 px-6 rounded-full text-white font-semibold text-lg"
-            style={{ background: 'linear-gradient(135deg, #FF5757 0%, #FF7B7B 100%)' }}
+            className="group relative w-full py-5 px-8 rounded-full font-semibold text-lg text-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+            style={{ background: 'linear-gradient(135deg, #FF5757 0%, #FF8E8E 100%)' }}
             data-testid="register-button"
           >
-            ЗАРЕГИСТРИРОВАТЬСЯ
+            <span className="relative z-10">ЗАРЕГИСТРИРОВАТЬСЯ</span>
+            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
           </button>
           
           <button
             onClick={() => setShowLogin(true)}
-            className="w-full py-4 px-6 rounded-full text-white font-semibold text-lg"
+            className="group relative w-full py-5 px-8 rounded-full font-semibold text-lg text-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
             style={{ background: 'linear-gradient(135deg, #34C759 0%, #5DD97C 100%)' }}
             data-testid="login-button"
           >
-            ВОЙТИ
+            <span className="relative z-10">ВОЙТИ</span>
+            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
           </button>
           
           <button
             onClick={() => setShowForgotPassword(true)}
-            className="text-[#7A7A7A] text-sm hover:text-[#1F1F1F] transition-colors"
+            className="text-[#1A73E8] text-sm hover:text-[#1F1F1F] transition-colors font-medium"
             data-testid="forgot-password-link"
           >
             Забыли пароль?
           </button>
         </div>
 
-        <div className="w-full max-w-5xl">
-          <h2 className="text-2xl font-semibold text-[#1F1F1F] text-center mb-8">
+        <div className="w-full max-w-6xl animate-fadeIn" style={{ animationDelay: '0.7s' }}>
+          <h2 className="text-3xl font-semibold text-center mb-12 bg-gradient-to-r from-[#1F1F1F] to-[#7A7A7A] text-transparent bg-clip-text">
             Почему выбирают наш сервис:
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="p-6 rounded-2xl border border-[#E5E5E5] bg-white hover:shadow-lg transition-shadow"
-                data-testid={`feature-card-${index}`}
-              >
-                <div className="text-[#1A73E8] mb-4">
-                  <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => {
+              const IconComponent = feature.icon;
+              return (
+                <div
+                  key={index}
+                  className="group p-8 rounded-3xl bg-white/80 backdrop-blur-sm border border-[#E5E5E5] hover:border-[#1A73E8] hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 animate-fadeInUp"
+                  style={{ animationDelay: `${0.8 + index * 0.2}s` }}
+                  data-testid={`feature-card-${index}`}
+                >
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                    <IconComponent className="w-8 h-8 text-white" />
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-[#1F1F1F] mb-4 group-hover:text-[#1A73E8] transition-colors">
+                    {feature.title}
+                  </h3>
+                  
+                  <ul className="space-y-3">
+                    {feature.items.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-[#7A7A7A]">
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#34C759] to-[#5DD97C] flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="text-sm">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <h3 className="text-lg font-semibold text-[#1F1F1F] mb-3">{feature.title}</h3>
-                <ul className="space-y-2">
-                  {feature.items.map((item, i) => (
-                    <li key={i} className="text-[#7A7A7A] text-sm">{item}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+              );
+            })}
           </div>
+        </div>
+
+        {/* Trust Badge */}
+        <div className="mt-16 flex items-center gap-3 px-6 py-3 rounded-full bg-white/60 backdrop-blur-sm border border-[#E5E5E5] animate-fadeIn" style={{ animationDelay: '1.2s' }}>
+          <Lock className="w-5 h-5 text-[#34C759]" />
+          <span className="text-sm text-[#7A7A7A]">Безопасный сервис · Проверка 18+ · Конфиденциальность</span>
         </div>
       </div>
 
@@ -127,6 +219,76 @@ const Landing = () => {
           setShowLogin(true);
         }}
       />
+
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        @keyframes floatUpDown {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-30px); }
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes slideDown {
+          from { 
+            opacity: 0;
+            transform: translateY(-30px);
+          }
+          to { 
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes slideUp {
+          from { 
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to { 
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes fadeInUp {
+          from { 
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to { 
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 1s ease-out forwards;
+          opacity: 0;
+        }
+        
+        .animate-slideDown {
+          animation: slideDown 0.8s ease-out forwards;
+          opacity: 0;
+        }
+        
+        .animate-slideUp {
+          animation: slideUp 0.8s ease-out forwards;
+          opacity: 0;
+        }
+        
+        .animate-fadeInUp {
+          animation: fadeInUp 0.8s ease-out forwards;
+          opacity: 0;
+        }
+      `}</style>
     </div>
   );
 };
