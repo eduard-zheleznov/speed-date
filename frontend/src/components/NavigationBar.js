@@ -1,10 +1,14 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Video, MessageCircle, User, Star } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { Video, MessageCircle, User, Star, Shield } from 'lucide-react';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
+  
+  const isAdmin = user?.email?.includes('admin');
 
   const navItems = [
     { icon: Video, path: '/videochat', label: 'Видеочат', testId: 'nav-videochat' },
