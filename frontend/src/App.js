@@ -10,6 +10,7 @@ import Matches from './pages/Matches';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import Subscriptions from './pages/Subscriptions';
+import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
