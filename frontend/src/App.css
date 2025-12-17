@@ -53,3 +53,8 @@ button:hover:not(:disabled) {
 button:active:not(:disabled) {
   transform: translateY(0);
 }
+
+/* Hide Emergent badge */
+#emergent-badge {
+  display: none !important;
+}
