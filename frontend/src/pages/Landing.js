@@ -107,7 +107,7 @@ const Landing = () => {
           </h1>
           
           <p className="text-center text-[#7A7A7A] text-lg max-w-2xl mx-auto animate-fadeIn" style={{ animationDelay: '0.3s' }}>
-            Знакомьтесь с интересными людьми через видеочат. Быстро, безопасно, удобно.
+            Знакомьтесь через видеочат.<br />Быстро, безопасно, удобно.
           </p>
         </div>
         
