@@ -1,8 +1,10 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from models import User, ProfileUpdate
 from auth import get_current_user_id
 from database import users_collection
 from datetime import datetime
+import base64
+import uuid
 
 router = APIRouter(prefix="/profile", tags=["profile"])
 
