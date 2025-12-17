@@ -46,11 +46,11 @@ const Landing = () => {
     }
   ];
 
-  const floatingShapes = [
-    { icon: Heart, delay: 0, duration: 20 },
-    { icon: MessageCircle, delay: 5, duration: 25 },
-    { icon: Video, delay: 10, duration: 22 },
-    { icon: Users, delay: 3, duration: 18 }
+  const floatingShapesData = [
+    { IconComp: Heart, delay: 0, duration: 20 },
+    { IconComp: MessageCircle, delay: 5, duration: 25 },
+    { IconComp: Video, delay: 10, duration: 22 },
+    { IconComp: Users, delay: 3, duration: 18 }
   ];
 
   return (
