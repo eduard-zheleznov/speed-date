@@ -76,11 +76,11 @@ const Landing = () => {
       </div>
 
       {/* Floating Icons */}
-      {floatingShapes.map((shape, index) => {
-        const IconComponent = shape.icon;
+      {floatingShapesData.map((shape, index) => {
+        const IconComponent = shape.IconComp;
         return (
           <div
-            key={index}
+            key={`float-${index}`}
             className="absolute opacity-10"
             style={{
               left: `${(index * 25) % 100}%`,
