@@ -12,9 +12,9 @@ const NavigationBar = () => {
 
   const baseNavItems = [
     { icon: Video, path: '/videochat', label: 'Видеочат', testId: 'nav-videochat', color: '#FF5757' },
-    { icon: MessageCircle, path: '/matches', label: 'Чаты', testId: 'nav-matches', color: '#4ECDC4' },
+    { icon: MessageCircle, path: '/matches', label: 'Чаты', testId: 'nav-matches', color: '#00C896' },
     { icon: User, path: '/profile', label: 'Профиль', testId: 'nav-profile', color: '#7B61FF' },
-    { icon: Star, path: '/subscriptions', label: 'Подписка', testId: 'nav-subscriptions', color: '#FFD93D' }
+    { icon: Star, path: '/subscriptions', label: 'Подписка', testId: 'nav-subscriptions', color: '#FFA726' }
   ];
   
   const navItems = isAdmin 
