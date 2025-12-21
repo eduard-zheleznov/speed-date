@@ -66,7 +66,7 @@ const Subscriptions = () => {
           {status && (
             <div className="text-center mb-8">
               <p className="text-[#7A7A7A]">
-                У вас осталось бесплатных общений:{' '}
+                У вас осталось полноценных общений:{' '}
                 <span className="font-bold text-[#1A73E8]" data-testid="remaining-communications">
                   {status.total_available}
                 </span>
