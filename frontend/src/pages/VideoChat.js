@@ -204,6 +204,15 @@ const VideoChat = () => {
               >
                 Создать демо-матч для тестирования
               </Button>
+              
+              <Button
+                onClick={() => setShowNoMatch(true)}
+                variant="outline"
+                className="px-8 py-3 rounded-full text-[#FF5757]"
+                data-testid="test-no-match-button"
+              >
+                Тест: показать окно "Собеседник не найден"
+              </Button>
             </div>
           </div>
         ) : (
