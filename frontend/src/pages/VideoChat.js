@@ -258,6 +258,7 @@ const VideoChat = () => {
         }}
         reportedUserId={matchUser?.id}
       />
+      </div>
     </div>
   );
 };
