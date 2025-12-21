@@ -339,6 +339,8 @@ const Profile = () => {
           </form>
         </DialogContent>
       </Dialog>
+      </div>
+      </div>
     </div>
   );
 };
