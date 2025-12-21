@@ -92,6 +92,7 @@ const Matches = () => {
           )}
         </div>
       </div>
+      </div>
     </div>
   );
 };
