@@ -171,8 +171,8 @@ const VideoChat = () => {
       <div className="flex-1 flex flex-col items-center justify-start pt-8 p-4" data-testid="videochat-container">
         {!session ? (
           <div className="w-full max-w-4xl space-y-6">
-            <div className="bg-[#F6F7F9] rounded-3xl p-8 aspect-video flex items-center justify-center">
-              <p className="text-[#7A7A7A] text-lg text-center">
+            <div className="bg-gradient-to-br from-[#2C2C54] to-[#474787] rounded-3xl p-8 aspect-video flex items-center justify-center shadow-2xl border border-white/10">
+              <p className="text-white/80 text-lg text-center">
                 Нажмите "Знакомиться" чтобы начать видео-знакомство
               </p>
             </div>
