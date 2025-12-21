@@ -64,7 +64,7 @@ const Matches = () => {
                 <div
                   key={match.id}
                   onClick={() => navigate(`/chat/${match.id}`)}
-                  className="bg-white border border-[#E5E5E5] rounded-2xl p-4 hover:shadow-lg transition-shadow cursor-pointer"
+                  className="bg-white/80 backdrop-blur-sm border-2 border-[#E5E5E5]/50 rounded-2xl p-4 hover:shadow-xl hover:border-[#1A73E8]/50 transition-all duration-300 cursor-pointer transform hover:scale-[1.02]"
                   data-testid={`match-card-${match.id}`}
                 >
                   <div className="flex items-center gap-4">
