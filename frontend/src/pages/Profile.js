@@ -215,23 +215,25 @@ const Profile = () => {
 
             {/* Editable Fields */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label>Имя</Label>
+              <div className="p-4 bg-white rounded-xl border-2 border-[#E5E5E5] hover:border-[#1A73E8]/30 transition-all">
+                <Label className="text-xs text-[#7A7A7A] mb-1 block">Имя</Label>
                 <Input
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   disabled={!editing}
+                  className="border-0 p-0 h-auto focus-visible:ring-0 font-medium"
                   data-testid="profile-name"
                 />
               </div>
 
-              <div>
-                <Label>Возраст</Label>
+              <div className="p-4 bg-white rounded-xl border-2 border-[#E5E5E5] hover:border-[#1A73E8]/30 transition-all">
+                <Label className="text-xs text-[#7A7A7A] mb-1 block">Возраст</Label>
                 <Input
                   type="number"
                   value={formData.age}
                   onChange={(e) => setFormData({...formData, age: e.target.value})}
                   disabled={!editing}
+                  className="border-0 p-0 h-auto focus-visible:ring-0 font-medium"
                   data-testid="profile-age"
                 />
               </div>
