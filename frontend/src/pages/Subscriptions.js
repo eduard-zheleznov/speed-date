@@ -144,7 +144,7 @@ const Subscriptions = () => {
             * Оплата через ЮKassa (мок)
           </p>
         </div>
-      </div>
+        </div>
       </div>
     </div>
   );
