@@ -238,6 +238,12 @@ const VideoChat = () => {
         onClose={() => setShowFilters(false)}
       />
 
+      <NoMatchModal
+        isOpen={showNoMatch}
+        onClose={() => setShowNoMatch(false)}
+        onOpenFilters={() => setShowFilters(true)}
+      />
+
       <ComplaintModal
         isOpen={showComplaint}
         onClose={() => {
