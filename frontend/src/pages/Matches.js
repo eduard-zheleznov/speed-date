@@ -45,8 +45,8 @@ const Matches = () => {
       
       <div className="relative z-10 flex flex-col min-h-screen">
         <NavigationBar />
-      
-      <div className="flex-1 p-4">
+        
+        <div className="flex-1 p-4">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-[#1F1F1F] mb-6" style={{ fontFamily: 'Manrope, sans-serif' }}>
             Мои чаты
