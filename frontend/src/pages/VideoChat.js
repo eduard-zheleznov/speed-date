@@ -20,6 +20,7 @@ const VideoChat = () => {
   const [showDecision, setShowDecision] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showComplaint, setShowComplaint] = useState(false);
+  const [showNoMatch, setShowNoMatch] = useState(false);
   const [searching, setSearching] = useState(false);
   const timerRef = useRef(null);
 
