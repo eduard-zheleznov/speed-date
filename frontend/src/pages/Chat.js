@@ -90,11 +90,11 @@ const Chat = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen relative overflow-hidden bg-white">
       <NavigationBar />
       
       {/* Chat Header */}
-      <div className="border-b border-[#E5E5E5] p-4">
+      <div className="border-b border-[#E5E5E5] p-4 bg-white/80 backdrop-blur-sm shadow-sm">
         <div className="max-w-4xl mx-auto flex items-center gap-4">
           <button onClick={() => navigate('/matches')} data-testid="back-to-matches">
             <ArrowLeft className="w-6 h-6 text-[#1F1F1F]" />
