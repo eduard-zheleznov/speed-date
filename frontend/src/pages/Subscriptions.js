@@ -141,7 +141,7 @@ const Subscriptions = () => {
           </div>
 
           <p className="text-center text-[#7A7A7A] text-sm mt-8">
-            * Оплата через ЮKassa (мок)
+            * Оплата через ЮKassa
           </p>
         </div>
         </div>
