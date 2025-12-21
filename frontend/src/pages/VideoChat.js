@@ -66,7 +66,7 @@ const VideoChat = () => {
       toast.success('Собеседник найден!');
     } catch (error) {
       if (error.response?.status === 404) {
-        toast.error('Собеседник не найден - измените критерии');
+        setShowNoMatch(true);
       } else if (error.response?.status === 403) {
         toast.error('У вас закончились бесплатные общения на сегодня');
         navigate('/subscriptions');
