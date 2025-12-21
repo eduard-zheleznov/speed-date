@@ -189,10 +189,6 @@ const VideoChat = () => {
               >
                 {searching ? 'Поиск...' : 'ЗНАКОМИТЬСЯ'}
               </Button>
-
-              <p className="text-[#FF5757] text-sm text-center">
-                * собеседник не найден - измените критерии
-              </p>
               
               <Button
                 onClick={createDemoMatch}
