@@ -159,8 +159,14 @@ const VideoChat = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <NavigationBar />
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#F8F9FA] via-white to-[#F0F4FF]" />
+      <div className="absolute top-20 right-10 w-96 h-96 bg-[#FF5757]/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 left-10 w-80 h-80 bg-[#34C759]/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+      
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <NavigationBar />
       
       <div className="flex-1 flex flex-col items-center justify-start pt-8 p-4" data-testid="videochat-container">
         {!session ? (
