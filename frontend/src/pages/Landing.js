@@ -119,22 +119,22 @@ const Landing = () => {
         
         <div className="flex flex-col gap-4 mb-16 w-full max-w-sm animate-slideUp" style={{ animationDelay: '0.5s' }}>
           <button
-            onClick={() => setShowRegister(true)}
-            className="group relative w-full py-5 px-8 rounded-full font-semibold text-lg text-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-            style={{ background: 'linear-gradient(135deg, #FF5757 0%, #FF8E8E 100%)' }}
-            data-testid="register-button"
-          >
-            <span className="relative z-10">ЗАРЕГИСТРИРОВАТЬСЯ</span>
-            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-          </button>
-          
-          <button
             onClick={() => setShowLogin(true)}
             className="group relative w-full py-5 px-8 rounded-full font-semibold text-lg text-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
             style={{ background: 'linear-gradient(135deg, #34C759 0%, #5DD97C 100%)' }}
             data-testid="login-button"
           >
             <span className="relative z-10">ВОЙТИ</span>
+            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+          </button>
+          
+          <button
+            onClick={() => setShowRegister(true)}
+            className="group relative w-full py-5 px-8 rounded-full font-semibold text-lg text-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+            style={{ background: 'linear-gradient(135deg, #FF5757 0%, #FF8E8E 100%)' }}
+            data-testid="register-button"
+          >
+            <span className="relative z-10">ЗАРЕГИСТРИРОВАТЬСЯ</span>
             <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
           </button>
           
