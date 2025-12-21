@@ -91,7 +91,7 @@ const Matches = () => {
             </div>
           )}
         </div>
-      </div>
+        </div>
       </div>
     </div>
   );
