@@ -38,8 +38,13 @@ const Matches = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <NavigationBar />
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#F8F9FA] via-white to-[#F0F4FF]" />
+      <div className="absolute top-20 left-10 w-72 h-72 bg-[#4ECDC4]/10 rounded-full blur-3xl animate-pulse" />
+      
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <NavigationBar />
       
       <div className="flex-1 p-4">
         <div className="max-w-4xl mx-auto">
