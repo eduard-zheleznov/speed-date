@@ -54,8 +54,14 @@ const Subscriptions = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <NavigationBar />
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#F8F9FA] via-white to-[#F0F4FF]" />
+      <div className="absolute top-20 right-10 w-80 h-80 bg-[#FFD93D]/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 left-10 w-72 h-72 bg-[#1A73E8]/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <NavigationBar />
       
       <div className="flex-1 p-4">
         <div className="max-w-6xl mx-auto">
