@@ -113,10 +113,8 @@ const Filters = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="negative">Негативное</SelectItem>
-                <SelectItem value="positive">Позитивное</SelectItem>
-                <SelectItem value="neutral">Нейтральное</SelectItem>
-                <SelectItem value="any">Любое</SelectItem>
+                <SelectItem value="any">Неважно</SelectItem>
+                <SelectItem value="negative">Отрицательное</SelectItem>
               </SelectContent>
             </Select>
           </div>
