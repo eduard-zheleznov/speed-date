@@ -82,7 +82,7 @@ const Matches = () => {
                     <div className="text-right">
                       <div className="flex items-center gap-1 text-[#FF5757] text-sm">
                         <Clock className="w-4 h-4" />
-                        <span>{match.expires_in_days} дн.</span>
+                        <span>{match.expires_in_days} дней</span>
                       </div>
                     </div>
                   </div>
