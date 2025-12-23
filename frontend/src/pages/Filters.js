@@ -57,7 +57,7 @@ const Filters = () => {
           Я ищу
         </h1>
         <p className="text-center text-[#7A7A7A] mb-8">
-          Установите предпочтения для поиска
+          Установите предпочтения для поиска собеседника
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">

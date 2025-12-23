@@ -4,7 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import NavigationBar from '../components/NavigationBar';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Send, ArrowLeft, Clock } from 'lucide-react';
+import { Send, ArrowLeft, Clock, HelpCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { toast } from 'sonner';
 import api from '../lib/api';
 
@@ -17,7 +18,10 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const [autoScroll, setAutoScroll] = useState(true);
 
   useEffect(() => {
     loadChatData();
