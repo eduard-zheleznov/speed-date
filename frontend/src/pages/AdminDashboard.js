@@ -150,7 +150,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const SortIcon = ({ field }) => {
+  const getSortIcon = (field) => {
     if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 opacity-30" />;
     return sortDirection === 'asc' ? 
       <ChevronUp className="w-4 h-4 ml-1" /> : 
