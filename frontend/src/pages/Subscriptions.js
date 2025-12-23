@@ -93,14 +93,17 @@ const Subscriptions = () => {
               ];
 
               const isSilver = index === 0;
+              const isEnabled = plan.enabled !== false;
 
               return (
                 <div
                   key={plan.name}
-                  className={`rounded-3xl p-8 border-2 hover:shadow-xl transition-all ${
-                    isSilver 
-                      ? 'bg-gradient-to-br from-[#F8F9FA] to-[#E8E9ED] border-[#C0C0C0] hover:border-[#A0A0A0]' 
-                      : 'bg-white border-[#E5E5E5] hover:border-[#1A73E8]'
+                  className={`rounded-3xl p-8 border-2 transition-all ${
+                    !isEnabled 
+                      ? 'opacity-60 bg-gray-100 border-gray-300' 
+                      : isSilver 
+                        ? 'bg-gradient-to-br from-[#F8F9FA] to-[#E8E9ED] border-[#C0C0C0] hover:border-[#A0A0A0] hover:shadow-xl' 
+                        : 'bg-white border-[#E5E5E5] hover:border-[#1A73E8] hover:shadow-xl'
                   }`}
                   data-testid={`plan-card-${plan.name}`}
                 >
@@ -108,7 +111,7 @@ const Subscriptions = () => {
                     <div
                       className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg ${
                         isSilver ? 'ring-4 ring-[#D7D8DC]/50' : ''
-                      }`}
+                      } ${!isEnabled ? 'grayscale' : ''}`}
                       style={{ background: gradients[index] }}
                     >
                       <Check className="w-10 h-10 text-white drop-shadow-md" />
@@ -143,13 +146,22 @@ const Subscriptions = () => {
                     </li>
                   </ul>
 
+                  {!isEnabled && (
+                    <p className="text-center text-red-500 text-sm mb-4 font-medium">
+                      Тариф временно не доступен
+                    </p>
+                  )}
+
                   <Button
-                    onClick={() => handlePurchase(plan.name)}
-                    className="w-full py-6 rounded-full text-white font-semibold text-lg"
-                    style={{ background: gradients[index] }}
+                    onClick={() => handlePurchase(plan.name, isEnabled)}
+                    disabled={!isEnabled}
+                    className={`w-full py-6 rounded-full text-white font-semibold text-lg ${
+                      !isEnabled ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                    style={{ background: isEnabled ? gradients[index] : '#9CA3AF' }}
                     data-testid={`purchase-${plan.name}-button`}
                   >
-                    ОПЛАТИТЬ
+                    {isEnabled ? 'ОПЛАТИТЬ' : 'НЕ ДОСТУПЕН'}
                   </Button>
                 </div>
               );
