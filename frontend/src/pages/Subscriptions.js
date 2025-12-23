@@ -83,28 +83,40 @@ const Subscriptions = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
             {plans.map((plan, index) => {
               const gradients = [
-                'linear-gradient(135deg, #C0C0C0 0%, #E8E8E8 100%)', // Silver
+                'linear-gradient(135deg, #A8A9AD 0%, #D7D8DC 50%, #B8B9BD 100%)', // Silver - более контрастный
                 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)', // Gold
                 'linear-gradient(135deg, #7B61FF 0%, #E056FD 100%)'  // VIP
               ];
 
+              const isSilver = index === 0;
+
               return (
                 <div
                   key={plan.name}
-                  className="bg-white rounded-3xl p-8 border-2 border-[#E5E5E5] hover:border-[#1A73E8] hover:shadow-xl transition-all"
+                  className={`rounded-3xl p-8 border-2 hover:shadow-xl transition-all ${
+                    isSilver 
+                      ? 'bg-gradient-to-br from-[#F8F9FA] to-[#E8E9ED] border-[#C0C0C0] hover:border-[#A0A0A0]' 
+                      : 'bg-white border-[#E5E5E5] hover:border-[#1A73E8]'
+                  }`}
                   data-testid={`plan-card-${plan.name}`}
                 >
                   <div className="text-center mb-6">
                     <div
-                      className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center"
+                      className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg ${
+                        isSilver ? 'ring-4 ring-[#D7D8DC]/50' : ''
+                      }`}
                       style={{ background: gradients[index] }}
                     >
-                      <Check className="w-10 h-10 text-white" />
+                      <Check className="w-10 h-10 text-white drop-shadow-md" />
                     </div>
-                    <h3 className="text-2xl font-bold text-[#1F1F1F] mb-2">
+                    <h3 className={`text-2xl font-bold mb-2 ${
+                      isSilver ? 'text-[#5A5A5A]' : 'text-[#1F1F1F]'
+                    }`}>
                       {plan.name}
                     </h3>
-                    <div className="text-4xl font-bold text-[#1A73E8] mb-1">
+                    <div className={`text-4xl font-bold mb-1 ${
+                      isSilver ? 'text-[#6B6B6B]' : 'text-[#1A73E8]'
+                    }`}>
                       {plan.price} ₽
                     </div>
                     <p className="text-[#7A7A7A] text-sm">
