@@ -269,7 +269,7 @@ const AdminDashboard = () => {
                     >
                       <div className="flex items-center">
                         Возраст
-                        <SortIcon field="age" />
+                        {getSortIcon('age')}
                       </div>
                     </th>
                     <th className="px-4 py-3 text-left text-sm font-semibold text-[#1F1F1F]">Город</th>
@@ -279,7 +279,7 @@ const AdminDashboard = () => {
                     >
                       <div className="flex items-center">
                         Регистрация
-                        <SortIcon field="created_at" />
+                        {getSortIcon('created_at')}
                       </div>
                     </th>
                     <th 
@@ -288,7 +288,7 @@ const AdminDashboard = () => {
                     >
                       <div className="flex items-center">
                         Последний вход
-                        <SortIcon field="last_login" />
+                        {getSortIcon('last_login')}
                       </div>
                     </th>
                     <th 
@@ -297,7 +297,7 @@ const AdminDashboard = () => {
                     >
                       <div className="flex items-center">
                         Жалобы
-                        <SortIcon field="complaint_count" />
+                        {getSortIcon('complaint_count')}
                       </div>
                     </th>
                     <th className="px-4 py-3 text-left text-sm font-semibold text-[#1F1F1F]">Действия</th>
