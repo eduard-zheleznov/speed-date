@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from models import SubscriptionPlan, CommunicationsStatus
 from auth import get_current_user_id
-from database import daily_communications_collection
+from database import daily_communications_collection, subscriptions_settings_collection
 from datetime import datetime, timezone, timedelta
 from typing import List
 
@@ -15,7 +15,18 @@ SUBSCRIPTION_PLANS = [
 
 @router.get("/plans", response_model=List[SubscriptionPlan])
 async def get_subscription_plans():
-    return SUBSCRIPTION_PLANS
+    # Get settings from DB
+    plans_with_settings = []
+    for plan in SUBSCRIPTION_PLANS:
+        setting = await subscriptions_settings_collection.find_one({"plan_name": plan.name}, {"_id": 0})
+        if setting:
+            plan_dict = plan.model_dump()
+            plan_dict["enabled"] = setting.get("enabled", True)
+            plans_with_settings.append(SubscriptionPlan(**plan_dict))
+        else:
+            plans_with_settings.append(plan)
+    
+    return plans_with_settings
 
 @router.get("/my-status", response_model=CommunicationsStatus)
 async def get_my_subscription_status(user_id: str = Depends(get_current_user_id)):
