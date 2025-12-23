@@ -139,7 +139,13 @@ const Chat = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-br from-[#F8F9FA] to-white" data-testid="messages-container">
+      <div 
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto p-4 bg-gradient-to-br from-[#F8F9FA] to-white" 
+        data-testid="messages-container"
+        style={{ height: 'calc(100vh - 180px)' }}
+      >
         <div className="max-w-4xl mx-auto space-y-4 min-h-full border-2 border-[#E5E5E5]/50 rounded-3xl p-6 bg-white/50 backdrop-blur-sm shadow-inner">
           {messages.map((message) => {
             const isOwn = message.sender_id === user.id;
