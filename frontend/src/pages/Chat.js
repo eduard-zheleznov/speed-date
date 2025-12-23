@@ -30,8 +30,18 @@ const Chat = () => {
   }, [matchId]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (autoScroll) {
+      scrollToBottom();
+    }
+  }, [messages, autoScroll]);
+
+  const handleScroll = () => {
+    if (messagesContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+      // Enable auto-scroll only when user is near the bottom
+      setAutoScroll(scrollHeight - scrollTop - clientHeight < 100);
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -97,11 +107,16 @@ const Chat = () => {
     <div className="min-h-screen relative overflow-hidden bg-white">
       <NavigationBar />
       
-      {/* Chat Header */}
-      <div className="border-b border-[#E5E5E5] p-4 bg-white/80 backdrop-blur-sm shadow-sm">
+      {/* Chat Header - Fixed */}
+      <div className="sticky top-0 z-20 border-b border-[#E5E5E5] p-4 bg-white shadow-sm">
         <div className="max-w-4xl mx-auto flex items-center gap-4">
-          <button onClick={() => navigate('/matches')} data-testid="back-to-matches">
-            <ArrowLeft className="w-6 h-6 text-[#1F1F1F]" />
+          <button 
+            onClick={() => navigate('/matches')} 
+            data-testid="back-to-matches"
+            className="flex items-center gap-2 text-[#1A73E8] hover:text-[#1557B5] transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6" />
+            <span className="font-medium">Назад</span>
           </button>
           
           <div className="flex-1">
@@ -110,7 +125,14 @@ const Chat = () => {
             </h2>
             <div className="flex items-center gap-1 text-[#FF5757] text-sm">
               <Clock className="w-4 h-4" />
-              <span>Чат истекает через {matchInfo?.expires_in_days} дн.</span>
+              <span>Чат удалится через {matchInfo?.expires_in_days} дней</span>
+              <button 
+                onClick={() => setShowInfoModal(true)}
+                className="ml-1 text-[#7A7A7A] hover:text-[#1A73E8] transition-colors"
+                aria-label="Информация о чате"
+              >
+                <HelpCircle className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>
