@@ -3,7 +3,7 @@ from models import User, Complaint
 from auth import get_current_user_id
 from database import (
     users_collection, complaints_collection, video_sessions_collection,
-    matches_collection, daily_communications_collection
+    matches_collection, daily_communications_collection, subscriptions_settings_collection
 )
 from datetime import datetime
 from typing import List
