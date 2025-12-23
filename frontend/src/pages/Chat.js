@@ -201,6 +201,29 @@ const Chat = () => {
           </Button>
         </form>
       </div>
+
+      {/* Info Modal */}
+      <Dialog open={showInfoModal} onOpenChange={setShowInfoModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-center" style={{ color: '#1F1F1F' }}>
+              Информация о чате
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-center text-[#7A7A7A]">
+              Чат будет доступен для общения 30 дней, после этого времени будет удалён.
+            </p>
+          </div>
+          <Button
+            onClick={() => setShowInfoModal(false)}
+            className="w-full py-4 rounded-full text-white font-semibold"
+            style={{ background: 'linear-gradient(135deg, #1A73E8 0%, #6A9EFF 100%)' }}
+          >
+            ПОНЯТНО
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
