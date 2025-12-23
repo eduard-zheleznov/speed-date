@@ -32,13 +32,17 @@ const Subscriptions = () => {
     }
   };
 
-  const handlePurchase = async (planName) => {
+  const handlePurchase = async (planName, enabled) => {
+    if (!enabled) {
+      toast.error('Тариф временно не доступен');
+      return;
+    }
     try {
       const response = await api.post(`/subscriptions/purchase?plan_name=${planName}`);
       toast.success(response.data.message);
       loadData(); // Reload status
     } catch (error) {
-      toast.error('Ошибка покупки');
+      toast.error(error.response?.data?.detail || 'Ошибка покупки');
     }
   };
 
