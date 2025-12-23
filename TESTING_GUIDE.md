@@ -139,7 +139,7 @@ asyncio.run(create_admin())
 - Пароль: admin123
 
 После входа:
-1. Перейдите на `/admin` (https://video-matches.preview.emergentagent.com/admin)
+1. Перейдите на `/admin` (https://vidmatch-15.preview.emergentagent.com/admin)
 2. Вы увидите 3 вкладки:
    - **Статистика**: общая статистика сервиса
    - **Пользователи**: список всех пользователей, возможность блокировки
