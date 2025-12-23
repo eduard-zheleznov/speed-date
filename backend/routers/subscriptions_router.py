@@ -60,6 +60,11 @@ async def purchase_subscription(plan_name: str, user_id: str = Depends(get_curre
     if not plan:
         raise HTTPException(status_code=404, detail="Plan not found")
     
+    # Check if plan is enabled
+    setting = await subscriptions_settings_collection.find_one({"plan_name": plan_name}, {"_id": 0})
+    if setting and not setting.get("enabled", True):
+        raise HTTPException(status_code=400, detail="Тариф временно не доступен")
+    
     # TODO: Integrate with ЮKassa payment
     # For now, just add communications
     
@@ -76,4 +81,4 @@ async def purchase_subscription(plan_name: str, user_id: str = Depends(get_curre
         {"$inc": {"premium_count": plan.communications}}
     )
     
-    return {"message": f"Successfully purchased {plan_name} plan (mock)", "communications_added": plan.communications}
+    return {"message": f"Подписка {plan_name} успешно оформлена", "communications_added": plan.communications}
