@@ -240,43 +240,47 @@ const Profile = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label>Рост (см)</Label>
+              <div className="p-4 bg-white rounded-xl border-2 border-[#D0D5DD] hover:border-[#1A73E8] transition-all shadow-sm">
+                <Label className="text-xs text-[#5A5A5A] mb-1 block font-medium">Рост (см)</Label>
                 <Input
                   type="number"
                   value={formData.height}
                   onChange={(e) => setFormData({...formData, height: e.target.value})}
                   disabled={!editing}
+                  className="border-0 p-0 h-auto focus-visible:ring-0 font-medium text-[#1F1F1F]"
                 />
               </div>
 
-              <div>
-                <Label>Вес (кг)</Label>
+              <div className="p-4 bg-white rounded-xl border-2 border-[#D0D5DD] hover:border-[#1A73E8] transition-all shadow-sm">
+                <Label className="text-xs text-[#5A5A5A] mb-1 block font-medium">Вес (кг)</Label>
                 <Input
                   type="number"
                   value={formData.weight}
                   onChange={(e) => setFormData({...formData, weight: e.target.value})}
                   disabled={!editing}
+                  className="border-0 p-0 h-auto focus-visible:ring-0 font-medium text-[#1F1F1F]"
                 />
               </div>
             </div>
 
-            <div>
-              <Label>Город</Label>
+            <div className="p-4 bg-white rounded-xl border-2 border-[#D0D5DD] hover:border-[#1A73E8] transition-all shadow-sm">
+              <Label className="text-xs text-[#5A5A5A] mb-1 block font-medium">Город</Label>
               <Input
                 value={formData.city}
                 onChange={(e) => setFormData({...formData, city: e.target.value})}
                 disabled={!editing}
+                className="border-0 p-0 h-auto focus-visible:ring-0 font-medium text-[#1F1F1F]"
               />
             </div>
 
-            <div>
-              <Label>О себе</Label>
+            <div className="p-4 bg-white rounded-xl border-2 border-[#D0D5DD] hover:border-[#1A73E8] transition-all shadow-sm">
+              <Label className="text-xs text-[#5A5A5A] mb-1 block font-medium">О себе</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                 disabled={!editing}
                 rows={4}
+                className="border-0 p-0 focus-visible:ring-0 font-medium text-[#1F1F1F] resize-none"
               />
             </div>
 
