@@ -116,3 +116,14 @@ async def activate_subscription_for_user(user_id: str, communications: int, admi
     )
     
     return {"message": f"Added {communications} communications to user {user_id}"}
+
+@router.put("/subscription/toggle")
+async def toggle_subscription_plan(plan_name: str, enabled: bool, admin_id: str = Depends(is_admin)):
+    """Toggle a subscription plan on or off"""
+    await subscriptions_settings_collection.update_one(
+        {"plan_name": plan_name},
+        {"$set": {"enabled": enabled, "updated_at": datetime.now().isoformat()}},
+        upsert=True
+    )
+    
+    return {"message": f"Plan {plan_name} {'enabled' if enabled else 'disabled'}"}
