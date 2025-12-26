@@ -15,14 +15,18 @@ class VideoDateAPITester:
         self.tests_passed = 0
         self.failed_tests = []
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, headers=None):
+    def run_test(self, name, method, endpoint, expected_status, data=None, headers=None, files=None):
         """Run a single API test"""
         url = f"{self.base_url}/api/{endpoint}"
-        test_headers = {'Content-Type': 'application/json'}
+        test_headers = {}
         if self.token:
             test_headers['Authorization'] = f'Bearer {self.token}'
         if headers:
             test_headers.update(headers)
+
+        # Don't set Content-Type for file uploads
+        if not files:
+            test_headers['Content-Type'] = 'application/json'
 
         self.tests_run += 1
         print(f"\n🔍 Testing {name}...")
@@ -32,9 +36,14 @@ class VideoDateAPITester:
             if method == 'GET':
                 response = requests.get(url, headers=test_headers, timeout=10)
             elif method == 'POST':
-                response = requests.post(url, json=data, headers=test_headers, timeout=10)
+                if files:
+                    response = requests.post(url, files=files, headers=test_headers, timeout=10)
+                else:
+                    response = requests.post(url, json=data, headers=test_headers, timeout=10)
             elif method == 'PUT':
                 response = requests.put(url, json=data, headers=test_headers, timeout=10)
+            elif method == 'DELETE':
+                response = requests.delete(url, headers=test_headers, timeout=10)
 
             success = response.status_code == expected_status
             if success:
