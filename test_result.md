@@ -103,109 +103,105 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Video dating service UI/UX improvements and admin panel enhancements:
-  1. Text changes ("Установите предпочтения для поиска собеседника", "Чат удалится через X дней")
-  2. Admin panel: delete users, dates columns, subscriptions tab, tariffs management, sorting
-  3. Silver subscription block design improvement
-  4. Profile page contrast fields
-  5. Chat navigation improvements
+  Video dating service - extensive UI/UX and admin panel improvements:
+  1. Text changes in filters, chat header, subscriptions
+  2. Admin panel: delete users, date columns, subscriptions tab with plan activation, tariffs management, sorting, feedback
+  3. Subscription logic: monthly plans with daily communications
+  4. Chat improvements: fixed navigation, unread messages, user avatars, profile modal
+  5. Feedback system for users
+  6. Profile photo upload stability
 
 backend:
-  - task: "Admin users endpoint with dates"
+  - task: "Admin subscription activation by plan"
     implemented: true
     working: true
     file: "/app/backend/routers/admin_router.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Added created_at and last_login columns, delete user endpoint, subscription toggle endpoint"
+    comment: "Admins can activate Серебро/Золото/VIP plans for users for 1 month"
 
-  - task: "Subscription plans toggle"
+  - task: "Subscription history tracking"
     implemented: true
     working: true
-    file: "/app/backend/routers/subscriptions_router.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Plans can be enabled/disabled from admin panel"
+    file: "/app/backend/routers/admin_router.py"
+    comment: "All subscription purchases are logged with dates and who activated"
+
+  - task: "Active subscription users endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/admin_router.py"
+    comment: "Returns users with active subscriptions"
+
+  - task: "Feedback system"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/feedback_router.py"
+    comment: "Users can submit feedback (ideas, suggestions, bugs)"
+
+  - task: "Chat with unread messages"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/chat_router.py"
+    comment: "Matches endpoint now returns unread_count and last_message"
 
 frontend:
-  - task: "Filters text update"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/pages/Filters.js"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Changed text to 'Установите предпочтения для поиска собеседника'"
-
-  - task: "Chat header with info modal"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/pages/Chat.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Updated text format, added help icon with info modal, fixed sticky header with back button"
-
-  - task: "Silver subscription design"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/pages/Subscriptions.js"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Silver block now has gradient background and more contrast"
-
-  - task: "Profile page contrast fields"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/pages/Profile.js"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Added border-2 border-[#D0D5DD] and shadow-sm to input fields"
-
-  - task: "Admin panel enhancements"
+  - task: "Admin panel subscriptions tab redesign"
     implemented: true
     working: true
     file: "/app/frontend/src/pages/AdminDashboard.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Added: delete button, dates columns, subscriptions tab, tariffs tab, sorting, totals"
+    comment: "Column renamed to 'Подписка', plan selection modal, history button"
+
+  - task: "Admin panel users with dates"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/AdminDashboard.js"
+    comment: "Added Рег., Вход, Подписка columns with sorting"
+
+  - task: "Tariffs with 'в мес.' and 'в день'"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/AdminDashboard.js"
+    comment: "Price shows 'X ₽ в мес.', communications show 'X общений в день'"
+
+  - task: "Subscriptions page text updates"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Subscriptions.js"
+    comment: "'На сегодня осталось общений', 'Без ограничений по времени', white background for Silver"
+
+  - task: "Chat fixed navigation"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Chat.js"
+    comment: "Fixed header with back button, partner avatar, info modal, profile modal"
+
+  - task: "Matches with unread badges and avatars"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Matches.js"
+    comment: "Shows unread count badge, partner photos, last message preview"
+
+  - task: "Feedback modal"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/FeedbackModal.js"
+    comment: "Users can submit ideas, suggestions, bug reports"
+
+  - task: "Profile photo handling improvements"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Profile.js"
+    comment: "Added loading states, better error handling"
 
 metadata:
   created_by: "main_agent"
-  version: "1.0"
-  test_sequence: 1
+  version: "2.0"
+  test_sequence: 2
   run_ui: true
 
 test_plan:
   current_focus:
-    - "Admin panel full testing"
-    - "Chat header and info modal"
+    - "Admin subscription activation flow"
+    - "Chat navigation on mobile"
+    - "Feedback submission"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -213,10 +209,14 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      Implemented all requested features:
-      1. Text changes in Filters and Chat pages
-      2. Admin panel with 5 tabs: Stats, Users (with dates/sorting/delete), Subscriptions, Tariffs, Complaints
-      3. Silver subscription block redesign
-      4. Profile page input fields with contrast borders
-      5. Chat navigation with sticky header and back button
-      Please test the admin panel functionality and chat info modal.
+      Implemented all 8 major tasks from user request:
+      1. Text changes done (filters, chat, subscriptions)
+      2. Admin panel fully redesigned with 6 tabs
+      3. Tariff logic updated (monthly/daily)
+      4. Subscription activation by plan (Серебро/Золото/VIP)
+      5. Silver tariff now has white background
+      6. Feedback system added (button in navbar)
+      7. Chat navigation fixed (sticky header, back button, partner profile)
+      8. Photo upload handling improved with loading states
+      
+      Testing completed via screenshots and API calls.
