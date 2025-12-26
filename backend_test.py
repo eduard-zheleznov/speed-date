@@ -422,22 +422,30 @@ class VideoDateAPITester:
         return success
 
 def main():
-    print("🚀 Starting Video Dating API Tests")
-    print("=" * 50)
+    print("🚀 Starting Video Dating API Critical Bug Fix Tests")
+    print("=" * 60)
     
     tester = VideoDateAPITester()
     
-    # Test sequence
+    # Test sequence focusing on critical bug fixes
     tests = [
         ("Root Endpoint", tester.test_root_endpoint),
-        ("User Registration", tester.test_register),
-        ("User Login", tester.test_login),
-        ("Get Current User", tester.test_get_current_user),
-        ("Profile Operations", tester.test_profile_operations),
-        ("Filters Operations", tester.test_filters_operations),
-        ("Subscriptions", tester.test_subscriptions),
-        ("Password Operations", tester.test_password_operations),
-        ("Matching Flow", tester.test_matching_flow),
+        
+        # Authentication Tests
+        ("Register Test Users", tester.test_register_with_test_users),
+        ("Login Valid Credentials", tester.test_login_valid_credentials),
+        ("Login Wrong Password", tester.test_login_wrong_password),
+        ("Get Current User", tester.test_get_current_user_auth),
+        
+        # Profile Photo Upload Tests
+        ("Upload JPEG Photo", tester.test_photo_upload_jpeg),
+        ("Upload PNG Photo", tester.test_photo_upload_png),
+        ("Photo Size Limit Test", tester.test_photo_upload_size_limit),
+        ("Set Main Photo", tester.test_set_main_photo),
+        ("Delete Photo", tester.test_delete_photo),
+        
+        # Profile Update Tests
+        ("Profile Update Complete", tester.test_profile_update_complete),
     ]
     
     for test_name, test_func in tests:
@@ -448,7 +456,7 @@ def main():
             print(f"❌ {test_name} failed with exception: {str(e)}")
     
     # Print summary
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 60)
     print(f"📊 Test Results: {tester.tests_passed}/{tester.tests_run} passed")
     
     if tester.failed_tests:
@@ -459,6 +467,8 @@ def main():
                 print(f"   Error: {failure['error']}")
             else:
                 print(f"   Expected: {failure.get('expected')}, Got: {failure.get('actual')}")
+                if 'response' in failure:
+                    print(f"   Response: {failure['response']}")
     
     success_rate = (tester.tests_passed / tester.tests_run * 100) if tester.tests_run > 0 else 0
     print(f"\n🎯 Success Rate: {success_rate:.1f}%")
