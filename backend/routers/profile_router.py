@@ -40,8 +40,15 @@ async def update_profile(profile_data: ProfileUpdate, user_id: str = Depends(get
         )
     
     user_dict = await users_collection.find_one({"id": user_id}, {"_id": 0})
+    if not user_dict:
+        raise HTTPException(status_code=404, detail="User not found")
+    
     if isinstance(user_dict.get("created_at"), str):
         user_dict["created_at"] = datetime.fromisoformat(user_dict["created_at"])
+    if isinstance(user_dict.get("last_login"), str):
+        user_dict["last_login"] = datetime.fromisoformat(user_dict["last_login"])
+    
+    return User(**user_dict)
 
 @router.post("/upload-photo")
 async def upload_photo(file: UploadFile = File(...), user_id: str = Depends(get_current_user_id)):
