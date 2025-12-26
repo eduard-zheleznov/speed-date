@@ -179,9 +179,10 @@ const Profile = () => {
                         {index !== 0 && (
                           <button
                             onClick={() => handleSetMainPhoto(index)}
-                            className="bg-[#1A73E8] hover:bg-[#1557B5] text-white text-xs px-3 py-2 rounded-lg shadow-lg transition-all"
+                            disabled={settingMainPhoto}
+                            className="bg-[#1A73E8] hover:bg-[#1557B5] text-white text-xs px-3 py-2 rounded-lg shadow-lg transition-all disabled:opacity-50"
                           >
-                            Сделать главным
+                            {settingMainPhoto ? '...' : 'Сделать главным'}
                           </button>
                         )}
                         <button
