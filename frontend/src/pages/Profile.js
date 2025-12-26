@@ -196,20 +196,30 @@ const Profile = () => {
                 ))}
                 
                 {(!user?.photos || user.photos.length < 3) && editing && (
-                  <label className="w-full aspect-square border-2 border-dashed border-[#1A73E8]/50 hover:border-[#1A73E8] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-[#1A73E8]/5 transition-all">
+                  <label className={`w-full aspect-square border-2 border-dashed border-[#1A73E8]/50 hover:border-[#1A73E8] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-[#1A73E8]/5 transition-all ${uploadingPhoto ? 'opacity-50 pointer-events-none' : ''}`}>
                     <input
                       type="file"
                       accept="image/*"
                       onChange={handleUploadPhoto}
                       className="hidden"
+                      disabled={uploadingPhoto}
                       data-testid="upload-photo-input"
                     />
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#1A73E8] to-[#6A9EFF] flex items-center justify-center mb-2">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                    </div>
-                    <span className="text-sm font-medium text-[#1A73E8]">Загрузить</span>
+                    {uploadingPhoto ? (
+                      <>
+                        <div className="w-12 h-12 rounded-full border-4 border-[#1A73E8]/30 border-t-[#1A73E8] animate-spin mb-2" />
+                        <span className="text-sm font-medium text-[#1A73E8]">Загрузка...</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#1A73E8] to-[#6A9EFF] flex items-center justify-center mb-2">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                        </div>
+                        <span className="text-sm font-medium text-[#1A73E8]">Загрузить</span>
+                      </>
+                    )}
                   </label>
                 )}
                 
