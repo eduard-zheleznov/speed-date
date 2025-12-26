@@ -84,17 +84,24 @@ const Profile = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
+    setUploadingPhoto(true);
+    const uploadFormData = new FormData();
+    uploadFormData.append('file', file);
 
     try {
-      const response = await api.post('/profile/upload-photo', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const response = await api.post('/profile/upload-photo', uploadFormData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 30000 // 30 second timeout for upload
       });
       updateUser({ ...user, photos: response.data.photos });
       toast.success('Фото загружено');
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Ошибка загрузки');
+      console.error('Upload error:', error);
+      toast.error(error.response?.data?.detail || 'Ошибка загрузки. Попробуйте другой файл.');
+    } finally {
+      setUploadingPhoto(false);
+      // Reset file input
+      e.target.value = '';
     }
   };
 
