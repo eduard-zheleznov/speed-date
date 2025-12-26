@@ -38,7 +38,7 @@ const Subscriptions = () => {
       return;
     }
     try {
-      const response = await api.post(`/subscriptions/purchase?plan_name=${planName}`);
+      const response = await api.post(`/subscriptions/purchase?plan_name=${encodeURIComponent(planName)}`);
       toast.success(response.data.message);
       loadData(); // Reload status
     } catch (error) {
@@ -76,7 +76,7 @@ const Subscriptions = () => {
           {status && (
             <div className="text-center mb-8">
               <p className="text-[#7A7A7A]">
-                У вас осталось полноценных общений:{' '}
+                На сегодня осталось общений:{' '}
                 <span className="font-bold text-[#1A73E8]" data-testid="remaining-communications">
                   {status.total_available}
                 </span>
@@ -87,12 +87,11 @@ const Subscriptions = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
             {plans.map((plan, index) => {
               const gradients = [
-                'linear-gradient(135deg, #A8A9AD 0%, #D7D8DC 50%, #B8B9BD 100%)', // Silver - более контрастный
+                'linear-gradient(135deg, #A8A9AD 0%, #D7D8DC 50%, #B8B9BD 100%)', // Silver
                 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)', // Gold
                 'linear-gradient(135deg, #7B61FF 0%, #E056FD 100%)'  // VIP
               ];
 
-              const isSilver = index === 0;
               const isEnabled = plan.enabled !== false;
 
               return (
@@ -101,33 +100,27 @@ const Subscriptions = () => {
                   className={`rounded-3xl p-8 border-2 transition-all ${
                     !isEnabled 
                       ? 'opacity-60 bg-gray-100 border-gray-300' 
-                      : isSilver 
-                        ? 'bg-gradient-to-br from-[#F8F9FA] to-[#E8E9ED] border-[#C0C0C0] hover:border-[#A0A0A0] hover:shadow-xl' 
-                        : 'bg-white border-[#E5E5E5] hover:border-[#1A73E8] hover:shadow-xl'
+                      : 'bg-white border-[#E5E5E5] hover:border-[#1A73E8] hover:shadow-xl'
                   }`}
                   data-testid={`plan-card-${plan.name}`}
                 >
                   <div className="text-center mb-6">
                     <div
                       className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg ${
-                        isSilver ? 'ring-4 ring-[#D7D8DC]/50' : ''
-                      } ${!isEnabled ? 'grayscale' : ''}`}
+                        !isEnabled ? 'grayscale' : ''
+                      }`}
                       style={{ background: gradients[index] }}
                     >
                       <Check className="w-10 h-10 text-white drop-shadow-md" />
                     </div>
-                    <h3 className={`text-2xl font-bold mb-2 ${
-                      isSilver ? 'text-[#5A5A5A]' : 'text-[#1F1F1F]'
-                    }`}>
+                    <h3 className="text-2xl font-bold mb-2 text-[#1F1F1F]">
                       {plan.name}
                     </h3>
-                    <div className={`text-4xl font-bold mb-1 ${
-                      isSilver ? 'text-[#6B6B6B]' : 'text-[#1A73E8]'
-                    }`}>
-                      {plan.price} ₽
+                    <div className="text-4xl font-bold mb-1 text-[#1A73E8]">
+                      {plan.price} ₽<span className="text-base font-normal text-[#7A7A7A]"> в мес.</span>
                     </div>
                     <p className="text-[#7A7A7A] text-sm">
-                      +{plan.communications} общений
+                      +{plan.communications} общений <span className="font-medium">в день</span>
                     </p>
                   </div>
 
@@ -138,7 +131,7 @@ const Subscriptions = () => {
                     </li>
                     <li className="flex items-center gap-2 text-[#1F1F1F]">
                       <Check className="w-5 h-5 text-[#34C759]" />
-                      <span>Без ограничений</span>
+                      <span>Без ограничений по времени</span>
                     </li>
                     <li className="flex items-center gap-2 text-[#1F1F1F]">
                       <Check className="w-5 h-5 text-[#34C759]" />
