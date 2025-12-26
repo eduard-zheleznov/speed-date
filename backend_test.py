@@ -1,7 +1,10 @@
 import requests
 import sys
 import json
+import io
+import base64
 from datetime import datetime
+from PIL import Image
 
 class VideoDateAPITester:
     def __init__(self, base_url="https://datemeet-7.preview.emergentagent.com"):
