@@ -56,6 +56,7 @@ const Profile = () => {
         city: user.city || '',
         description: user.description || ''
       });
+      setCitySearch(user.city || '');
     }
   }, [user]);
 
