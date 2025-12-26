@@ -52,8 +52,16 @@ async def update_profile(profile_data: ProfileUpdate, user_id: str = Depends(get
 
 @router.post("/upload-photo")
 async def upload_photo(file: UploadFile = File(...), user_id: str = Depends(get_current_user_id)):
+    # Validate content type
+    if not file.content_type or not file.content_type.startswith('image/'):
+        raise HTTPException(status_code=400, detail="Только изображения разрешены")
+    
     # Read file
     contents = await file.read()
+    
+    # Check size (max 5MB)
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Файл слишком большой (макс 5МБ)")
     
     # Convert to base64
     base64_image = base64.b64encode(contents).decode('utf-8')
@@ -67,7 +75,7 @@ async def upload_photo(file: UploadFile = File(...), user_id: str = Depends(get_
     # Add photo (max 3)
     photos = user_dict.get("photos", [])
     if len(photos) >= 3:
-        raise HTTPException(status_code=400, detail="Maximum 3 photos allowed")
+        raise HTTPException(status_code=400, detail="Максимум 3 фотографии")
     
     photos.append(photo_url)
     
