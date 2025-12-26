@@ -209,14 +209,18 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      Implemented all 8 major tasks from user request:
-      1. Text changes done (filters, chat, subscriptions)
-      2. Admin panel fully redesigned with 6 tabs
-      3. Tariff logic updated (monthly/daily)
-      4. Subscription activation by plan (Серебро/Золото/VIP)
-      5. Silver tariff now has white background
-      6. Feedback system added (button in navbar)
-      7. Chat navigation fixed (sticky header, back button, partner profile)
-      8. Photo upload handling improved with loading states
+      Fixed critical bugs reported by user:
       
-      Testing completed via screenshots and API calls.
+      1. FIXED: Registration checkbox "Script Error" - replaced Radix UI Checkbox with native HTML input
+      2. FIXED: Login error handling - improved error messages in Russian
+      3. FIXED: Photo upload for iPhone (HEIC/HEIF) - added Pillow + pillow-heif for image conversion
+         - Now converts HEIC to JPEG
+         - Auto-rotates based on EXIF
+         - Resizes large images (max 1200px)
+         - Compresses to JPEG with quality=85
+      
+      Testing needed:
+      - Full registration flow
+      - Login with correct/wrong credentials
+      - Photo upload (various formats including HEIC)
+      - Profile photo management (set main, delete)
