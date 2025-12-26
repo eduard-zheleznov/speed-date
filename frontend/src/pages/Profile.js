@@ -116,12 +116,16 @@ const Profile = () => {
   };
 
   const handleSetMainPhoto = async (index) => {
+    setSettingMainPhoto(true);
     try {
       const response = await api.post(`/profile/set-main-photo?photo_index=${index}`);
       updateUser({ ...user, photos: response.data.photos });
       toast.success('Главное фото обновлено');
     } catch (error) {
-      toast.error('Ошибка');
+      console.error('Set main photo error:', error);
+      toast.error(error.response?.data?.detail || 'Ошибка установки главного фото');
+    } finally {
+      setSettingMainPhoto(false);
     }
   };
 
