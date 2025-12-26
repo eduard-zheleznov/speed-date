@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from models import SubscriptionPlan, CommunicationsStatus
 from auth import get_current_user_id
-from database import daily_communications_collection, subscriptions_settings_collection
+from database import daily_communications_collection, subscriptions_settings_collection, users_collection, subscription_history_collection
 from datetime import datetime, timezone, timedelta
 from typing import List
+import uuid
 
 router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
 
@@ -31,14 +32,44 @@ async def get_subscription_plans():
 @router.get("/my-status", response_model=CommunicationsStatus)
 async def get_my_subscription_status(user_id: str = Depends(get_current_user_id)):
     today = datetime.now(timezone.utc).date().isoformat()
+    
+    # Check if user has active subscription
+    user = await users_collection.find_one({"id": user_id}, {"_id": 0})
+    active_plan = None
+    if user:
+        expires_at = user.get("subscription_expires_at")
+        if expires_at:
+            if isinstance(expires_at, str):
+                expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+            if expires_at > datetime.now(timezone.utc):
+                active_plan = user.get("active_subscription")
+    
+    # Get or create daily communications
     comm_status = await daily_communications_collection.find_one({"user_id": user_id, "date": today}, {"_id": 0})
     
     if not comm_status:
-        comm_status = {"user_id": user_id, "date": today, "free_count": 5, "premium_count": 0, "used_count": 0}
+        # Determine premium count based on active subscription
+        premium_count = 0
+        if active_plan:
+            plan = next((p for p in SUBSCRIPTION_PLANS if p.name == active_plan), None)
+            if plan:
+                premium_count = plan.communications
+        
+        comm_status = {"user_id": user_id, "date": today, "free_count": 5, "premium_count": premium_count, "used_count": 0}
         await daily_communications_collection.insert_one(comm_status)
+    else:
+        # Update premium count if user has active subscription but daily record doesn't reflect it
+        if active_plan:
+            plan = next((p for p in SUBSCRIPTION_PLANS if p.name == active_plan), None)
+            if plan and comm_status.get("premium_count", 0) < plan.communications:
+                comm_status["premium_count"] = plan.communications
+                await daily_communications_collection.update_one(
+                    {"user_id": user_id, "date": today},
+                    {"$set": {"premium_count": plan.communications}}
+                )
     
     remaining_free = max(0, comm_status["free_count"] - comm_status["used_count"])
-    premium_available = comm_status["premium_count"]
+    premium_available = comm_status.get("premium_count", 0)
     total_available = remaining_free + premium_available
     
     # Calculate when it resets (midnight UTC)
@@ -66,19 +97,39 @@ async def purchase_subscription(plan_name: str, user_id: str = Depends(get_curre
         raise HTTPException(status_code=400, detail="Тариф временно не доступен")
     
     # TODO: Integrate with ЮKassa payment
-    # For now, just add communications
+    # For now, just activate subscription
     
-    today = datetime.now(timezone.utc).date().isoformat()
-    comm_status = await daily_communications_collection.find_one({"user_id": user_id, "date": today}, {"_id": 0})
+    now = datetime.now(timezone.utc)
+    expires_at = now + timedelta(days=30)
     
-    if not comm_status:
-        comm_status = {"user_id": user_id, "date": today, "free_count": 5, "premium_count": 0, "used_count": 0}
-        await daily_communications_collection.insert_one(comm_status)
-    
-    # Add premium communications
-    await daily_communications_collection.update_one(
-        {"user_id": user_id, "date": today},
-        {"$inc": {"premium_count": plan.communications}}
+    # Update user's subscription
+    await users_collection.update_one(
+        {"id": user_id},
+        {"$set": {
+            "active_subscription": plan_name,
+            "subscription_activated_at": now.isoformat(),
+            "subscription_expires_at": expires_at.isoformat()
+        }}
     )
     
-    return {"message": f"Подписка {plan_name} успешно оформлена", "communications_added": plan.communications}
+    # Add to subscription history
+    history_entry = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "plan_name": plan_name,
+        "price": plan.price,
+        "communications_per_day": plan.communications,
+        "purchase_date": now.isoformat(),
+        "activated_by": "user"
+    }
+    await subscription_history_collection.insert_one(history_entry)
+    
+    # Set daily communications
+    today = now.date().isoformat()
+    await daily_communications_collection.update_one(
+        {"user_id": user_id, "date": today},
+        {"$set": {"premium_count": plan.communications, "free_count": 5, "used_count": 0}},
+        upsert=True
+    )
+    
+    return {"message": f"Подписка {plan_name} успешно оформлена на 1 месяц", "communications_per_day": plan.communications}
