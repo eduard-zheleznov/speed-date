@@ -1,21 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Search } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../lib/api';
+import { RUSSIAN_CITIES } from '../data/russianCities';
 
 const Filters = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [citySearch, setCitySearch] = useState('');
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [formData, setFormData] = useState({
     age_range: '25-35',
     gender_preference: 'female',
-    city: 'Moscow',
-    smoking_preference: 'negative'
+    city: '',
+    smoking_preference: 'any'
   });
 
   useEffect(() => {
@@ -30,13 +35,34 @@ const Filters = () => {
     try {
       const response = await api.get('/filters');
       setFormData(response.data);
+      setCitySearch(response.data.city || '');
     } catch (error) {
       console.error('Error loading filters:', error);
     }
   };
 
+  // Filter cities based on search
+  const filteredCities = useMemo(() => {
+    if (!citySearch) return RUSSIAN_CITIES.slice(0, 20);
+    return RUSSIAN_CITIES.filter(city => 
+      city.toLowerCase().includes(citySearch.toLowerCase())
+    ).slice(0, 20);
+  }, [citySearch]);
+
+  const handleCitySelect = (city) => {
+    setFormData({ ...formData, city });
+    setCitySearch(city);
+    setShowCityDropdown(false);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!formData.city) {
+      toast.error('Пожалуйста, выберите город');
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -90,20 +116,51 @@ const Filters = () => {
             </Select>
           </div>
 
-          <div>
+          <div className="relative">
             <Label htmlFor="city">Город</Label>
-            <Select value={formData.city} onValueChange={(value) => setFormData({...formData, city: value})} required>
-              <SelectTrigger data-testid="filter-city-select">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Moscow">Москва</SelectItem>
-                <SelectItem value="Saint Petersburg">Санкт-Петербург</SelectItem>
-                <SelectItem value="Novosibirsk">Новосибирск</SelectItem>
-                <SelectItem value="Yekaterinburg">Екатеринбург</SelectItem>
-                <SelectItem value="Kazan">Казань</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="relative mt-2">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#7A7A7A] z-10" />
+              <Input
+                id="city"
+                type="text"
+                placeholder="Начните вводить название..."
+                value={citySearch}
+                onChange={(e) => {
+                  setCitySearch(e.target.value);
+                  setShowCityDropdown(true);
+                  if (!e.target.value) {
+                    setFormData({ ...formData, city: '' });
+                  }
+                }}
+                onFocus={() => setShowCityDropdown(true)}
+                className="pl-10"
+                data-testid="filter-city-input"
+              />
+            </div>
+            
+            {/* City dropdown */}
+            {showCityDropdown && (
+              <div className="absolute z-20 w-full mt-1 bg-white border border-[#E5E5E5] rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                {filteredCities.length === 0 ? (
+                  <div className="p-3 text-center text-[#7A7A7A] text-sm">
+                    Город не найден
+                  </div>
+                ) : (
+                  filteredCities.map((city) => (
+                    <button
+                      key={city}
+                      type="button"
+                      onClick={() => handleCitySelect(city)}
+                      className={`w-full text-left px-4 py-2 hover:bg-[#F6F7F9] transition-colors ${
+                        formData.city === city ? 'bg-[#1A73E8]/10 text-[#1A73E8]' : 'text-[#1F1F1F]'
+                      }`}
+                    >
+                      {city}
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
           </div>
 
           <div>
@@ -114,7 +171,7 @@ const Filters = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="any">Неважно</SelectItem>
-                <SelectItem value="negative">Отрицательное</SelectItem>
+                <SelectItem value="negative">Отрицательно</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -130,6 +187,14 @@ const Filters = () => {
           </Button>
         </form>
       </div>
+      
+      {/* Click outside to close city dropdown */}
+      {showCityDropdown && (
+        <div 
+          className="fixed inset-0 z-10" 
+          onClick={() => setShowCityDropdown(false)}
+        />
+      )}
     </div>
   );
 };
