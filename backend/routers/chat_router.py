@@ -3,11 +3,26 @@ from models import MatchInfo, Message, MessageCreate, UserPublic
 from auth import get_current_user_id
 from database import matches_collection, messages_collection, users_collection
 from datetime import datetime, timezone
-from typing import List
+from typing import List, Optional
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
-@router.get("/matches", response_model=List[MatchInfo])
+class LastMessage(BaseModel):
+    text: str
+    timestamp: datetime
+    is_own: bool
+
+class MatchInfoExtended(BaseModel):
+    id: str
+    partner: UserPublic
+    matched_at: datetime
+    expires_in_days: int
+    active: bool
+    unread_count: int = 0
+    last_message: Optional[LastMessage] = None
+
+@router.get("/matches")
 async def get_matches(user_id: str = Depends(get_current_user_id)):
     matches = await matches_collection.find(
         {
@@ -30,14 +45,46 @@ async def get_matches(user_id: str = Depends(get_current_user_id)):
             
             days_remaining = (match["chat_expires_at"] - datetime.now(timezone.utc)).days
             
-            match_info = MatchInfo(
-                id=match["id"],
-                partner=UserPublic(**partner_dict),
-                matched_at=match["matched_at"],
-                expires_in_days=max(0, days_remaining),
-                active=match["active"]
+            # Get unread count
+            last_read_key = f"last_read_{user_id}"
+            last_read = match.get(last_read_key)
+            
+            unread_query = {"match_id": match["id"], "sender_id": {"$ne": user_id}}
+            if last_read:
+                unread_query["timestamp"] = {"$gt": last_read}
+            
+            unread_count = await messages_collection.count_documents(unread_query)
+            
+            # Get last message
+            last_msg = await messages_collection.find_one(
+                {"match_id": match["id"]},
+                {"_id": 0},
+                sort=[("timestamp", -1)]
             )
+            
+            last_message = None
+            if last_msg:
+                if isinstance(last_msg.get("timestamp"), str):
+                    last_msg["timestamp"] = datetime.fromisoformat(last_msg["timestamp"])
+                last_message = LastMessage(
+                    text=last_msg["text"][:50] + ("..." if len(last_msg["text"]) > 50 else ""),
+                    timestamp=last_msg["timestamp"],
+                    is_own=last_msg["sender_id"] == user_id
+                )
+            
+            match_info = {
+                "id": match["id"],
+                "partner": UserPublic(**partner_dict).model_dump(),
+                "matched_at": match["matched_at"].isoformat(),
+                "expires_in_days": max(0, days_remaining),
+                "active": match["active"],
+                "unread_count": unread_count,
+                "last_message": last_message.model_dump() if last_message else None
+            }
             result.append(match_info)
+    
+    # Sort by last message time (most recent first)
+    result.sort(key=lambda x: x.get("last_message", {}).get("timestamp", "") if x.get("last_message") else "", reverse=True)
     
     return result
 
@@ -56,6 +103,12 @@ async def get_messages(match_id: str, user_id: str = Depends(get_current_user_id
     for msg in messages:
         if isinstance(msg.get("timestamp"), str):
             msg["timestamp"] = datetime.fromisoformat(msg["timestamp"])
+    
+    # Mark messages as read
+    await matches_collection.update_one(
+        {"id": match_id},
+        {"$set": {f"last_read_{user_id}": datetime.now(timezone.utc).isoformat()}}
+    )
     
     return [Message(**msg) for msg in messages]
 
@@ -93,7 +146,7 @@ async def send_message(match_id: str, message_data: MessageCreate, user_id: str 
     
     return message
 
-@router.get("/{match_id}/info", response_model=MatchInfo)
+@router.get("/{match_id}/info")
 async def get_match_info(match_id: str, user_id: str = Depends(get_current_user_id)):
     match = await matches_collection.find_one({"id": match_id}, {"_id": 0})
     if not match:
@@ -115,10 +168,10 @@ async def get_match_info(match_id: str, user_id: str = Depends(get_current_user_
     
     days_remaining = (match["chat_expires_at"] - datetime.now(timezone.utc)).days
     
-    return MatchInfo(
-        id=match["id"],
-        partner=UserPublic(**partner_dict),
-        matched_at=match["matched_at"],
-        expires_in_days=max(0, days_remaining),
-        active=match["active"]
-    )
+    return {
+        "id": match["id"],
+        "partner": UserPublic(**partner_dict).model_dump(),
+        "matched_at": match["matched_at"].isoformat(),
+        "expires_in_days": max(0, days_remaining),
+        "active": match["active"]
+    }
