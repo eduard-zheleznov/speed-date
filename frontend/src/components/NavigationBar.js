@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Video, MessageCircle, User, Star, Shield } from 'lucide-react';
+import { Video, MessageCircle, User, Star, Shield, HelpCircle } from 'lucide-react';
+import FeedbackModal from './FeedbackModal';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const [showFeedback, setShowFeedback] = useState(false);
   
   const isAdmin = user?.email?.includes('admin');
 
