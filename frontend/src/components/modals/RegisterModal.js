@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Checkbox } from '../ui/checkbox';
 import { toast } from 'sonner';
 
 const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
@@ -96,15 +95,17 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
           </div>
 
           <div className="flex items-center space-x-2">
-            <Checkbox
+            <input
+              type="checkbox"
               id="age-confirm"
               checked={ageConfirmed}
-              onCheckedChange={(checked) => setAgeConfirmed(checked === true)}
+              onChange={(e) => setAgeConfirmed(e.target.checked)}
+              className="h-4 w-4 rounded border border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
               data-testid="age-confirm-checkbox"
             />
             <label
               htmlFor="age-confirm"
-              className="text-sm text-[#1F1F1F] cursor-pointer"
+              className="text-sm text-[#1F1F1F] cursor-pointer select-none"
             >
               Мне есть 18 лет
             </label>
