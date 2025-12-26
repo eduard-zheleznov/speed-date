@@ -37,10 +37,10 @@ async def register(user_data: UserCreate):
 async def login(credentials: UserLogin):
     user_dict = await users_collection.find_one({"email": credentials.email}, {"_id": 0})
     if not user_dict:
-        raise HTTPException(status_code=400, detail="Invalid email or password")
+        raise HTTPException(status_code=400, detail="Неверный email или пароль")
     
     if not verify_password(credentials.password, user_dict["password_hash"]):
-        raise HTTPException(status_code=400, detail="Invalid email or password")
+        raise HTTPException(status_code=400, detail="Неверный email или пароль")
     
     if user_dict.get("blocked", False):
         raise HTTPException(status_code=403, detail="Your account has been blocked")
