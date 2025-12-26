@@ -251,11 +251,53 @@ frontend:
     file: "/app/frontend/src/components/FeedbackModal.js"
     comment: "Users can submit ideas, suggestions, bug reports"
 
-  - task: "Profile photo handling improvements"
+  - task: "Registration flow with native HTML checkbox"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/modals/RegisterModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "TESTED: Registration modal opens correctly. Native HTML checkbox (line 106-113) works without 'Script Error' - fixed Radix UI issue. Form submission successful with unique email. Success toast 'Регистрация успешна!' displays. Redirect to /complete-profile working."
+
+  - task: "Login flow with authentication"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/modals/LoginModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "TESTED: Login modal opens correctly. Valid credentials (alice@test.com/test123) login successful. Success toast 'Успешный вход!' displays. Redirect to /videochat working."
+
+  - task: "Login error handling with Russian messages"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/modals/LoginModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "TESTED: Wrong password correctly rejected. Russian error message 'Неверный email или пароль' displays correctly. Backend error messages fixed to return Russian text."
+
+  - task: "Profile photo management interface"
     implemented: true
     working: true
     file: "/app/frontend/src/pages/Profile.js"
-    comment: "Added loading states, better error handling"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "TESTED: Profile page loads correctly. Edit mode enables photo upload interface. Photo upload area clickable (file picker opens). Save profile button works without errors. Existing photos display with main photo indicator."
 
 metadata:
   created_by: "main_agent"
