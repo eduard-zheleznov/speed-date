@@ -26,6 +26,22 @@ const Profile = () => {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [settingMainPhoto, setSettingMainPhoto] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [citySearch, setCitySearch] = useState('');
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+
+  // Filter cities based on search
+  const filteredCities = useMemo(() => {
+    if (!citySearch) return RUSSIAN_CITIES.slice(0, 20);
+    return RUSSIAN_CITIES.filter(city => 
+      city.toLowerCase().includes(citySearch.toLowerCase())
+    ).slice(0, 20);
+  }, [citySearch]);
+
+  const handleCitySelect = (city) => {
+    setFormData({ ...formData, city });
+    setCitySearch(city);
+    setShowCityDropdown(false);
+  };
 
   useEffect(() => {
     if (user) {
