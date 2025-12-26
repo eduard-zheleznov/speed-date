@@ -30,6 +30,7 @@ from routers.complaints_router import router as complaints_router
 from routers.subscriptions_router import router as subscriptions_router
 from routers.admin_router import router as admin_router
 from routers.testing_router import router as testing_router
+from routers.feedback_router import router as feedback_router
 from database import close_db
 
 # Create API router with prefix
@@ -50,6 +51,7 @@ api_router.include_router(complaints_router)
 api_router.include_router(subscriptions_router)
 api_router.include_router(admin_router)
 api_router.include_router(testing_router)
+api_router.include_router(feedback_router)
 
 app.include_router(api_router)
 
