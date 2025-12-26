@@ -99,7 +99,7 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
             <Checkbox
               id="age-confirm"
               checked={ageConfirmed}
-              onCheckedChange={setAgeConfirmed}
+              onCheckedChange={(checked) => setAgeConfirmed(checked === true)}
               data-testid="age-confirm-checkbox"
             />
             <label
