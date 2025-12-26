@@ -315,11 +315,12 @@ const Profile = () => {
             {editing && (
               <Button
                 onClick={handleSave}
+                disabled={savingProfile}
                 className="w-full py-6 rounded-full text-white font-semibold text-lg"
                 style={{ background: 'linear-gradient(135deg, #1A73E8 0%, #6A9EFF 100%)' }}
                 data-testid="save-profile"
               >
-                СОХРАНИТЬ
+                {savingProfile ? 'СОХРАНЕНИЕ...' : 'СОХРАНИТЬ'}
               </Button>
             )}
 
