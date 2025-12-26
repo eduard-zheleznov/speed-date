@@ -5,6 +5,16 @@ from database import users_collection
 from datetime import datetime
 import base64
 import uuid
+import io
+from PIL import Image
+
+# Register HEIF opener if available
+try:
+    import pillow_heif
+    pillow_heif.register_heif_opener()
+    HEIF_SUPPORTED = True
+except ImportError:
+    HEIF_SUPPORTED = False
 
 router = APIRouter(prefix="/profile", tags=["profile"])
 
