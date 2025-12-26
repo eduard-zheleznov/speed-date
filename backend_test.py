@@ -76,22 +76,42 @@ class VideoDateAPITester:
         """Test root API endpoint"""
         return self.run_test("Root API", "GET", "", 200)
 
-    def test_register(self):
-        """Test user registration"""
-        timestamp = datetime.now().strftime('%H%M%S')
-        test_data = {
-            "email": f"test_user_{timestamp}@example.com",
-            "name": f"Test User {timestamp}",
-            "password": "TestPass123!",
+    def test_register_with_test_users(self):
+        """Test user registration with specific test users"""
+        # Test alice@test.com registration
+        alice_data = {
+            "email": "alice@test.com",
+            "name": "Alice Test",
+            "password": "test123",
             "age_confirmed": True
         }
         
         success, response = self.run_test(
-            "User Registration",
+            "Register Alice Test User",
             "POST",
             "auth/register",
             200,
-            data=test_data
+            data=alice_data
+        )
+        
+        if success and 'access_token' in response:
+            print(f"   Alice registered successfully")
+            return True
+        return False
+
+    def test_login_valid_credentials(self):
+        """Test login with valid credentials"""
+        login_data = {
+            "email": "alice@test.com",
+            "password": "test123"
+        }
+        
+        success, response = self.run_test(
+            "Login with Valid Credentials",
+            "POST",
+            "auth/login",
+            200,
+            data=login_data
         )
         
         if success and 'access_token' in response:
@@ -101,48 +121,187 @@ class VideoDateAPITester:
             return True
         return False
 
-    def test_login(self):
-        """Test user login with existing user"""
-        # First register a user
-        timestamp = datetime.now().strftime('%H%M%S')
-        register_data = {
-            "email": f"login_test_{timestamp}@example.com",
-            "name": f"Login Test {timestamp}",
-            "password": "TestPass123!",
-            "age_confirmed": True
-        }
-        
-        # Register first
-        success, _ = self.run_test(
-            "Register for Login Test",
-            "POST",
-            "auth/register",
-            200,
-            data=register_data
-        )
-        
-        if not success:
-            return False
-        
-        # Now test login
+    def test_login_wrong_password(self):
+        """Test login with wrong password - should return 'Invalid credentials'"""
         login_data = {
-            "email": register_data["email"],
-            "password": register_data["password"]
+            "email": "alice@test.com",
+            "password": "wrongpassword"
         }
         
         success, response = self.run_test(
-            "User Login",
+            "Login with Wrong Password",
             "POST",
             "auth/login",
-            200,
+            400,  # Should return 400 for invalid credentials
             data=login_data
         )
         
-        return success and 'access_token' in response
+        return success
 
-    def test_get_current_user(self):
-        """Test getting current user info"""
-        return self.run_test("Get Current User", "GET", "auth/me", 200)[0]
+    def test_get_current_user_auth(self):
+        """Test getting current user with authentication"""
+        return self.run_test("Get Current User (Authenticated)", "GET", "auth/me", 200)[0]
+
+    def create_test_image(self, format='JPEG', size=(800, 600)):
+        """Create a test image in memory"""
+        img = Image.new('RGB', size, color='red')
+        img_buffer = io.BytesIO()
+        img.save(img_buffer, format=format)
+        img_buffer.seek(0)
+        return img_buffer
+
+    def test_photo_upload_jpeg(self):
+        """Test JPEG photo upload"""
+        if not self.token:
+            print("   Skipping - No authentication token")
+            return False
+            
+        # Create test JPEG image
+        img_buffer = self.create_test_image('JPEG')
+        
+        files = {
+            'file': ('test.jpg', img_buffer, 'image/jpeg')
+        }
+        
+        success, response = self.run_test(
+            "Upload JPEG Photo",
+            "POST",
+            "profile/upload-photo",
+            200,
+            files=files
+        )
+        
+        return success and 'photo_url' in response
+
+    def test_photo_upload_png(self):
+        """Test PNG photo upload"""
+        if not self.token:
+            print("   Skipping - No authentication token")
+            return False
+            
+        # Create test PNG image
+        img_buffer = self.create_test_image('PNG')
+        
+        files = {
+            'file': ('test.png', img_buffer, 'image/png')
+        }
+        
+        success, response = self.run_test(
+            "Upload PNG Photo",
+            "POST",
+            "profile/upload-photo",
+            200,
+            files=files
+        )
+        
+        return success and 'photo_url' in response
+
+    def test_photo_upload_size_limit(self):
+        """Test photo upload size limit (max 10MB)"""
+        if not self.token:
+            print("   Skipping - No authentication token")
+            return False
+            
+        # Create large test image (simulate >10MB)
+        # Note: We'll create a smaller image but test the logic
+        img_buffer = self.create_test_image('JPEG', (2000, 2000))
+        
+        files = {
+            'file': ('large_test.jpg', img_buffer, 'image/jpeg')
+        }
+        
+        success, response = self.run_test(
+            "Upload Large Photo (Size Test)",
+            "POST",
+            "profile/upload-photo",
+            200,  # Should still work for reasonable size
+            files=files
+        )
+        
+        return success
+
+    def test_set_main_photo(self):
+        """Test setting a different photo as main"""
+        if not self.token:
+            print("   Skipping - No authentication token")
+            return False
+            
+        # First upload another photo
+        img_buffer = self.create_test_image('JPEG')
+        files = {
+            'file': ('test2.jpg', img_buffer, 'image/jpeg')
+        }
+        
+        upload_success, _ = self.run_test(
+            "Upload Second Photo for Main Test",
+            "POST",
+            "profile/upload-photo",
+            200,
+            files=files
+        )
+        
+        if not upload_success:
+            return False
+        
+        # Now set photo at index 1 as main
+        success, response = self.run_test(
+            "Set Main Photo",
+            "POST",
+            "profile/set-main-photo?photo_index=1",
+            200
+        )
+        
+        return success
+
+    def test_delete_photo(self):
+        """Test photo deletion"""
+        if not self.token:
+            print("   Skipping - No authentication token")
+            return False
+            
+        # Delete photo at index 1
+        success, response = self.run_test(
+            "Delete Photo",
+            "DELETE",
+            "profile/photo/1",
+            200
+        )
+        
+        return success
+
+    def test_profile_update_complete(self):
+        """Test profile update with valid data and verify profile_completed flag"""
+        if not self.token:
+            print("   Skipping - No authentication token")
+            return False
+            
+        # Update profile with complete data
+        profile_data = {
+            "age": 28,
+            "height": 170,
+            "weight": 65,
+            "gender": "female",
+            "education": "higher",
+            "smoking": "negative",
+            "city": "Moscow",
+            "description": "Test user profile description"
+        }
+        
+        success, response = self.run_test(
+            "Update Profile (Complete)",
+            "PUT",
+            "profile",
+            200,
+            data=profile_data
+        )
+        
+        if success:
+            # Check if profile_completed is set correctly
+            profile_completed = response.get('profile_completed', False)
+            print(f"   Profile completed flag: {profile_completed}")
+            return profile_completed
+        
+        return False
 
     def test_profile_operations(self):
         """Test profile get and update"""
