@@ -47,6 +47,10 @@ class User(BaseModel):
     blocked: bool = False
     complaint_count: int = 0
     profile_completed: bool = False
+    # Subscription fields
+    active_subscription: Optional[str] = None  # Current plan name or None
+    subscription_expires_at: Optional[datetime] = None
+    subscription_activated_at: Optional[datetime] = None
 
 class UserPublic(BaseModel):
     id: str
