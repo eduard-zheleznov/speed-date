@@ -15,6 +15,9 @@ complaints_collection = db.complaints
 subscriptions_collection = db.subscriptions
 daily_communications_collection = db.daily_communications
 subscriptions_settings_collection = db.subscriptions_settings
+user_subscriptions_collection = db.user_subscriptions
+subscription_history_collection = db.subscription_history
+feedback_collection = db.feedback
 
 async def close_db():
     client.close()
