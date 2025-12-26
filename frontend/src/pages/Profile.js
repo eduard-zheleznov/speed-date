@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import NavigationBar from '../components/NavigationBar';
@@ -8,8 +8,10 @@ import { Label } from '../components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Textarea } from '../components/ui/textarea';
+import { Search } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../lib/api';
+import { RUSSIAN_CITIES } from '../data/russianCities';
 
 const Profile = () => {
   const { user, updateUser, logout } = useAuth();
