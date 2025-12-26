@@ -117,8 +117,3 @@ async def set_main_photo(photo_index: int, user_id: str = Depends(get_current_us
     )
     
     return {"photos": photos}
-
-    if isinstance(user_dict.get("last_login"), str):
-        user_dict["last_login"] = datetime.fromisoformat(user_dict["last_login"])
-    
-    return User(**user_dict)
