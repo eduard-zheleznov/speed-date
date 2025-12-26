@@ -139,7 +139,7 @@ async def make_decision(decision: MatchDecision, user_id: str = Depends(get_curr
         raise HTTPException(status_code=403, detail="Not authorized")
     
     # Store decision
-    decision_field = f"user1_decision" if session_dict["user1_id"] == user_id else "user2_decision"
+    decision_field = "user1_decision" if session_dict["user1_id"] == user_id else "user2_decision"
     await video_sessions_collection.update_one(
         {"id": decision.session_id},
         {"$set": {decision_field: decision.accepted}}
