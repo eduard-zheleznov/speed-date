@@ -42,19 +42,23 @@ const Profile = () => {
   }, [user]);
 
   const handleSave = async () => {
+    setSavingProfile(true);
     try {
       const response = await api.put('/profile', {
         ...formData,
-        age: parseInt(formData.age),
-        height: parseInt(formData.height),
-        weight: parseInt(formData.weight)
+        age: parseInt(formData.age) || null,
+        height: parseInt(formData.height) || null,
+        weight: parseInt(formData.weight) || null
       });
       
       updateUser(response.data);
       toast.success('Профиль обновлен');
       setEditing(false);
     } catch (error) {
-      toast.error('Ошибка сохранения');
+      console.error('Save error:', error);
+      toast.error(error.response?.data?.detail || 'Ошибка сохранения');
+    } finally {
+      setSavingProfile(false);
     }
   };
 
