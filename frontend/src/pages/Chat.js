@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import NavigationBar from '../components/NavigationBar';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Send, ArrowLeft, Clock, HelpCircle, User } from 'lucide-react';
+import { Send, ArrowLeft, Clock, HelpCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { toast } from 'sonner';
 import api from '../lib/api';
@@ -27,12 +27,11 @@ const Chat = () => {
 
   useEffect(() => {
     loadChatData();
-    const interval = setInterval(loadMessages, 3000); // Poll for new messages
+    const interval = setInterval(loadMessages, 3000);
     return () => clearInterval(interval);
   }, [matchId]);
 
   useEffect(() => {
-    // Only auto-scroll when new messages arrive, not on user scroll
     if (messages.length > lastMessageCountRef.current && !userScrolled) {
       scrollToBottom();
     }
@@ -61,8 +60,6 @@ const Chat = () => {
       setMatchInfo(infoResponse.data);
       setMessages(messagesResponse.data);
       lastMessageCountRef.current = messagesResponse.data.length;
-      
-      // Scroll to bottom on initial load
       setTimeout(scrollToBottom, 100);
     } catch (error) {
       toast.error('Ошибка загрузки чата');
@@ -86,7 +83,7 @@ const Chat = () => {
     if (!newMessage.trim() || sending) return;
 
     setSending(true);
-    setUserScrolled(false); // Reset scroll state when sending
+    setUserScrolled(false);
     try {
       const response = await api.post(`/chat/${matchId}/message`, {
         text: newMessage
@@ -102,12 +99,21 @@ const Chat = () => {
     }
   };
 
-  // Get partner's avatar
   const getPartnerAvatar = () => {
     if (matchInfo?.partner?.photos?.length > 0) {
       return matchInfo.partner.photos[0];
     }
     return null;
+  };
+
+  const getEducationText = (education) => {
+    const map = { higher: 'Высшее', secondary: 'Среднее', vocational: 'Средне-специальное' };
+    return map[education] || education;
+  };
+
+  const getSmokingText = (smoking) => {
+    const map = { negative: 'Отрицательное', positive: 'Позитивное', neutral: 'Нейтральное', any: 'Неважно' };
+    return map[smoking] || smoking;
   };
 
   if (loading) {
@@ -122,56 +128,55 @@ const Chat = () => {
   }
 
   const partnerAvatar = getPartnerAvatar();
+  const partner = matchInfo?.partner;
 
   return (
-    <div className="h-screen flex flex-col bg-white overflow-hidden">
-      {/* Fixed Navigation */}
-      <div className="flex-shrink-0">
+    <div className="fixed inset-0 flex flex-col bg-white">
+      {/* Fixed Navigation - stays at top always */}
+      <div className="flex-shrink-0 sticky top-0 z-50 bg-white">
         <NavigationBar />
       </div>
       
-      {/* Fixed Chat Header */}
-      <div className="flex-shrink-0 border-b border-[#E5E5E5] px-4 py-3 bg-white shadow-sm z-20">
+      {/* Fixed Chat Header - always visible below navigation */}
+      <div className="flex-shrink-0 sticky top-[60px] z-40 border-b border-[#E5E5E5] px-4 py-3 bg-white shadow-sm">
         <div className="max-w-4xl mx-auto flex items-center gap-3">
           <button 
             onClick={() => navigate('/matches')} 
             data-testid="back-to-matches"
-            className="flex items-center gap-2 text-[#1A73E8] hover:text-[#1557B5] transition-colors"
+            className="flex items-center gap-2 text-[#1A73E8] hover:text-[#1557B5] transition-colors flex-shrink-0"
           >
             <ArrowLeft className="w-5 h-5" />
             <span className="font-medium hidden sm:inline">Назад</span>
           </button>
           
-          {/* Partner info - clickable */}
           <button 
             onClick={() => setShowProfileModal(true)}
-            className="flex items-center gap-3 flex-1 hover:bg-[#F6F7F9] rounded-lg p-2 transition-colors"
+            className="flex items-center gap-3 flex-1 min-w-0 hover:bg-[#F6F7F9] rounded-lg p-2 transition-colors"
           >
             {partnerAvatar ? (
               <img 
                 src={partnerAvatar} 
-                alt={matchInfo?.partner.name}
-                className="w-10 h-10 rounded-full object-cover"
+                alt={partner?.name}
+                className="w-10 h-10 rounded-full object-cover flex-shrink-0"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#7B61FF] to-[#E056FD] flex items-center justify-center text-white font-bold">
-                {matchInfo?.partner.name[0]}
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#7B61FF] to-[#E056FD] flex items-center justify-center text-white font-bold flex-shrink-0">
+                {partner?.name?.[0]}
               </div>
             )}
-            <div className="text-left">
-              <h2 className="text-base font-semibold text-[#1F1F1F]">
-                {matchInfo?.partner.name}, {matchInfo?.partner.age}
+            <div className="text-left min-w-0">
+              <h2 className="text-base font-semibold text-[#1F1F1F] truncate">
+                {partner?.name}, {partner?.age}
               </h2>
               <div className="flex items-center gap-1 text-[#FF5757] text-xs">
-                <Clock className="w-3 h-3" />
-                <span>Чат удалится через {matchInfo?.expires_in_days} дней</span>
+                <Clock className="w-3 h-3 flex-shrink-0" />
+                <span className="truncate">Чат удалится через {matchInfo?.expires_in_days} дней</span>
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowInfoModal(true);
                   }}
-                  className="ml-1 text-[#7A7A7A] hover:text-[#1A73E8] transition-colors"
-                  aria-label="Информация о чате"
+                  className="ml-1 text-[#7A7A7A] hover:text-[#1A73E8] transition-colors flex-shrink-0"
                 >
                   <HelpCircle className="w-3 h-3" />
                 </button>
@@ -181,67 +186,70 @@ const Chat = () => {
         </div>
       </div>
 
-      {/* Scrollable Messages Area */}
+      {/* Scrollable Messages Area - takes remaining space */}
       <div 
         ref={messagesContainerRef}
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto bg-gradient-to-br from-[#F8F9FA] to-white"
         data-testid="messages-container"
       >
-        <div className="max-w-4xl mx-auto p-4">
-          <div className="space-y-3 min-h-full">
-            {messages.map((message) => {
-              const isOwn = message.sender_id === user.id;
-              return (
-                <div
-                  key={message.id}
-                  className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-                  data-testid={`message-${message.id}`}
-                >
-                  {/* Partner avatar for incoming messages */}
-                  {!isOwn && (
-                    <div className="flex-shrink-0 mr-2">
-                      {partnerAvatar ? (
-                        <img 
-                          src={partnerAvatar} 
-                          alt=""
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7B61FF] to-[#E056FD] flex items-center justify-center text-white text-sm font-bold">
-                          {matchInfo?.partner.name[0]}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
+        <div className="max-w-4xl mx-auto p-4 pb-2">
+          <div className="space-y-3">
+            {messages.length === 0 ? (
+              <div className="text-center py-12 text-[#7A7A7A]">
+                <p>Начните переписку первым!</p>
+              </div>
+            ) : (
+              messages.map((message) => {
+                const isOwn = message.sender_id === user.id;
+                return (
                   <div
-                    className={`max-w-[70%] px-4 py-2 rounded-2xl ${
-                      isOwn
-                        ? 'bg-[#1A73E8] text-white'
-                        : 'bg-white text-[#1F1F1F] shadow-sm border border-[#E5E5E5]'
-                    }`}
+                    key={message.id}
+                    className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                    data-testid={`message-${message.id}`}
                   >
-                    <p className="break-words text-sm">{message.text}</p>
-                    <p className={`text-xs mt-1 ${
-                      isOwn ? 'text-white/70' : 'text-[#7A7A7A]'
-                    }`}>
-                      {new Date(message.timestamp).toLocaleTimeString('ru-RU', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
+                    {!isOwn && (
+                      <div className="flex-shrink-0 mr-2">
+                        {partnerAvatar ? (
+                          <img 
+                            src={partnerAvatar} 
+                            alt=""
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7B61FF] to-[#E056FD] flex items-center justify-center text-white text-sm font-bold">
+                            {partner?.name?.[0]}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    <div
+                      className={`max-w-[70%] px-4 py-2 rounded-2xl ${
+                        isOwn
+                          ? 'bg-[#1A73E8] text-white'
+                          : 'bg-white text-[#1F1F1F] shadow-sm border border-[#E5E5E5]'
+                      }`}
+                    >
+                      <p className="break-words text-sm">{message.text}</p>
+                      <p className={`text-xs mt-1 ${isOwn ? 'text-white/70' : 'text-[#7A7A7A]'}`}>
+                        {new Date(message.timestamp).toLocaleTimeString('ru-RU', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
             <div ref={messagesEndRef} />
           </div>
         </div>
       </div>
 
-      {/* Fixed Input at bottom */}
-      <div className="flex-shrink-0 border-t border-[#E5E5E5] p-3 bg-white">
+      {/* Fixed Input at bottom - always visible */}
+      <div className="flex-shrink-0 sticky bottom-0 z-40 border-t border-[#E5E5E5] p-3 bg-white">
         <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto flex gap-2">
           <Input
             value={newMessage}
@@ -279,16 +287,16 @@ const Chat = () => {
           <Button
             onClick={() => setShowInfoModal(false)}
             className="w-full py-4 rounded-full text-white font-semibold"
-            style={{ background: 'linear-gradient(135deg, #1A73E8 0%, #6A9EFF 100%)' }}
+            style={{ background: '#1A73E8' }}
           >
             ПОНЯТНО
           </Button>
         </DialogContent>
       </Dialog>
 
-      {/* Profile Modal */}
+      {/* Profile Modal with full info */}
       <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold text-center" style={{ color: '#1F1F1F' }}>
               Профиль собеседника
@@ -300,37 +308,78 @@ const Chat = () => {
               {partnerAvatar ? (
                 <img 
                   src={partnerAvatar} 
-                  alt={matchInfo?.partner.name}
+                  alt={partner?.name}
                   className="w-24 h-24 rounded-full object-cover"
                 />
               ) : (
                 <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#7B61FF] to-[#E056FD] flex items-center justify-center text-white text-4xl font-bold">
-                  {matchInfo?.partner.name[0]}
+                  {partner?.name?.[0]}
                 </div>
               )}
             </div>
             
-            {/* Info */}
-            <div className="text-center space-y-2">
+            {/* Name and Age */}
+            <div className="text-center mb-4">
               <h3 className="text-xl font-bold text-[#1F1F1F]">
-                {matchInfo?.partner.name}, {matchInfo?.partner.age}
+                {partner?.name}, {partner?.age}
               </h3>
-              {matchInfo?.partner.city && (
-                <p className="text-[#7A7A7A]">{matchInfo?.partner.city}</p>
-              )}
-              {matchInfo?.partner.description && (
-                <p className="text-sm text-[#7A7A7A] mt-4 bg-[#F6F7F9] p-3 rounded-lg">
-                  {matchInfo?.partner.description}
-                </p>
+              {partner?.city && (
+                <p className="text-[#7A7A7A]">{partner.city}</p>
               )}
             </div>
 
-            {/* Additional photos */}
-            {matchInfo?.partner.photos?.length > 1 && (
+            {/* Profile Details */}
+            <div className="space-y-3 bg-[#F6F7F9] rounded-xl p-4">
+              {partner?.height && (
+                <div className="flex justify-between">
+                  <span className="text-[#7A7A7A]">Рост:</span>
+                  <span className="text-[#1F1F1F] font-medium">{partner.height} см</span>
+                </div>
+              )}
+              {partner?.weight && (
+                <div className="flex justify-between">
+                  <span className="text-[#7A7A7A]">Вес:</span>
+                  <span className="text-[#1F1F1F] font-medium">{partner.weight} кг</span>
+                </div>
+              )}
+              {partner?.gender && (
+                <div className="flex justify-between">
+                  <span className="text-[#7A7A7A]">Пол:</span>
+                  <span className="text-[#1F1F1F] font-medium">
+                    {partner.gender === 'male' ? 'Мужской' : 'Женский'}
+                  </span>
+                </div>
+              )}
+              {partner?.education && (
+                <div className="flex justify-between">
+                  <span className="text-[#7A7A7A]">Образование:</span>
+                  <span className="text-[#1F1F1F] font-medium">{getEducationText(partner.education)}</span>
+                </div>
+              )}
+              {partner?.smoking && (
+                <div className="flex justify-between">
+                  <span className="text-[#7A7A7A]">Курение:</span>
+                  <span className="text-[#1F1F1F] font-medium">{getSmokingText(partner.smoking)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Description */}
+            {partner?.description && (
+              <div className="mt-4">
+                <p className="text-sm text-[#7A7A7A] mb-2">О себе:</p>
+                <p className="text-sm text-[#1F1F1F] bg-[#F6F7F9] p-3 rounded-lg">
+                  {partner.description}
+                </p>
+              </div>
+            )}
+
+            {/* Photos */}
+            {partner?.photos?.length > 1 && (
               <div className="mt-4">
                 <p className="text-sm text-[#7A7A7A] mb-2">Фотографии:</p>
-                <div className="flex gap-2 overflow-x-auto">
-                  {matchInfo.partner.photos.map((photo, idx) => (
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {partner.photos.map((photo, idx) => (
                     <img 
                       key={idx}
                       src={photo}
