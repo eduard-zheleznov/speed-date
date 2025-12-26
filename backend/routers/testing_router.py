@@ -11,14 +11,50 @@ router = APIRouter(prefix="/testing", tags=["testing"])
 async def create_demo_match(user_id: str = Depends(get_current_user_id)):
     """Create a demo match for testing chat functionality"""
     
-    # Find a test user to match with
+    # Find a test user to match with (any user except current one)
     test_user = await users_collection.find_one(
-        {"id": {"$ne": user_id}, "profile_completed": True},
+        {"id": {"$ne": user_id}},
         {"_id": 0}
     )
     
     if not test_user:
-        raise HTTPException(status_code=404, detail="No test user found")
+        # Create a demo user if none exists
+        demo_user = {
+            "id": f"demo-user-{str(uuid.uuid4())[:8]}",
+            "email": f"demo_{datetime.now().timestamp()}@test.com",
+            "name": f"Test User {int(datetime.now().timestamp()) % 1000000}",
+            "age": 25,
+            "gender": "female",
+            "city": "Москва",
+            "height": 165,
+            "weight": 55,
+            "education": "higher",
+            "smoking": "negative",
+            "photos": [],
+            "profile_completed": True,
+            "blocked": False,
+            "complaint_count": 0,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "hashed_password": "demo"
+        }
+        await users_collection.insert_one(demo_user)
+        test_user = demo_user
+    
+    # Check if match already exists
+    existing_match = await matches_collection.find_one({
+        "$or": [
+            {"user1_id": user_id, "user2_id": test_user["id"]},
+            {"user1_id": test_user["id"], "user2_id": user_id}
+        ],
+        "active": True
+    })
+    
+    if existing_match:
+        return {
+            "message": "Match already exists",
+            "match_id": existing_match["id"],
+            "partner_name": test_user["name"]
+        }
     
     # Create a completed video session
     session = VideoSession(
