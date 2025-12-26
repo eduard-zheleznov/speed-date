@@ -311,14 +311,52 @@ const Profile = () => {
               </div>
             </div>
 
-            <div className="p-4 bg-white rounded-xl border-2 border-[#D0D5DD] hover:border-[#1A73E8] transition-all shadow-sm">
-              <Label className="text-xs text-[#5A5A5A] mb-1 block font-medium">Город</Label>
-              <Input
-                value={formData.city}
-                onChange={(e) => setFormData({...formData, city: e.target.value})}
-                disabled={!editing}
-                className="border-0 p-0 h-auto focus-visible:ring-0 font-medium text-[#1F1F1F]"
-              />
+            <div className="p-4 bg-white rounded-xl border-2 border-[#D0D5DD] hover:border-[#1A73E8] transition-all shadow-sm relative">
+              <Label className="text-xs text-[#5A5A5A] mb-1 block font-medium">Ближайший город</Label>
+              {editing ? (
+                <div className="relative">
+                  <Search className="absolute left-0 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#7A7A7A]" />
+                  <Input
+                    value={citySearch}
+                    onChange={(e) => {
+                      setCitySearch(e.target.value);
+                      setShowCityDropdown(true);
+                      if (!e.target.value) {
+                        setFormData({ ...formData, city: '' });
+                      }
+                    }}
+                    onFocus={() => setShowCityDropdown(true)}
+                    placeholder="Начните вводить название..."
+                    className="border-0 p-0 pl-6 h-auto focus-visible:ring-0 font-medium text-[#1F1F1F]"
+                  />
+                  
+                  {/* City dropdown */}
+                  {showCityDropdown && (
+                    <div className="absolute z-50 w-full mt-2 bg-white border border-[#E5E5E5] rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {filteredCities.length === 0 ? (
+                        <div className="p-3 text-center text-[#7A7A7A] text-sm">
+                          Город не найден
+                        </div>
+                      ) : (
+                        filteredCities.map((city) => (
+                          <button
+                            key={city}
+                            type="button"
+                            onClick={() => handleCitySelect(city)}
+                            className={`w-full text-left px-4 py-2 hover:bg-[#F6F7F9] transition-colors ${
+                              formData.city === city ? 'bg-[#1A73E8]/10 text-[#1A73E8]' : 'text-[#1F1F1F]'
+                            }`}
+                          >
+                            {city}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="font-medium text-[#1F1F1F]">{formData.city || 'Не указан'}</p>
+              )}
             </div>
 
             <div className="p-4 bg-white rounded-xl border-2 border-[#D0D5DD] hover:border-[#1A73E8] transition-all shadow-sm">
