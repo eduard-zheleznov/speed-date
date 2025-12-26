@@ -21,6 +21,9 @@ const Profile = () => {
     current_password: '',
     new_password: ''
   });
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [settingMainPhoto, setSettingMainPhoto] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
 
   useEffect(() => {
     if (user) {
