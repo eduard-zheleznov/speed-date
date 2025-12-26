@@ -149,6 +149,31 @@ class SubscriptionPlan(BaseModel):
     communications: int
     enabled: bool = True
 
+class UserSubscription(BaseModel):
+    """Active subscription for a user"""
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    plan_name: str
+    communications_per_day: int
+    activated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    expires_at: datetime
+    is_active: bool = True
+    activated_by: str = "user"  # "user" or "admin"
+
+class SubscriptionHistory(BaseModel):
+    """History of subscription purchases"""
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    plan_name: str
+    price: int
+    communications_per_day: int
+    purchase_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    activated_by: str = "user"
+
 class Subscription(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
