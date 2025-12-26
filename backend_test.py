@@ -255,13 +255,12 @@ class VideoDateAPITester:
         if not upload_success:
             print("   Could not upload second photo - testing with existing photos")
         
-        # Now set photo at index 1 as main (using POST with data)
+        # Now set photo at index 1 as main (using query parameter)
         success, response = self.run_test(
             "Set Main Photo",
             "POST",
-            "profile/set-main-photo",
-            200,
-            data={"photo_index": 1}
+            "profile/set-main-photo?photo_index=1",
+            200
         )
         
         return success
