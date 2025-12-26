@@ -205,4 +205,11 @@ async def toggle_subscription_plan(plan_name: str, enabled: bool, admin_id: str 
         upsert=True
     )
     
+
+
+@router.get("/feedbacks")
+async def get_all_feedbacks(admin_id: str = Depends(is_admin)):
+    """Get all user feedbacks"""
+    feedbacks = await feedback_collection.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return feedbacks
     return {"message": f"Plan {plan_name} {'enabled' if enabled else 'disabled'}"}
