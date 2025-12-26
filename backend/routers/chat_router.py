@@ -84,7 +84,15 @@ async def get_matches(user_id: str = Depends(get_current_user_id)):
             result.append(match_info)
     
     # Sort by last message time (most recent first)
-    result.sort(key=lambda x: x.get("last_message", {}).get("timestamp", "") if x.get("last_message") else "", reverse=True)
+    def get_sort_key(x):
+        if x.get("last_message") and x["last_message"].get("timestamp"):
+            ts = x["last_message"]["timestamp"]
+            if isinstance(ts, str):
+                return ts
+            return ts.isoformat() if hasattr(ts, 'isoformat') else str(ts)
+        return ""
+    
+    result.sort(key=get_sort_key, reverse=True)
     
     return result
 
