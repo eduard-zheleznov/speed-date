@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import NavigationBar from '../components/NavigationBar';
 import { 
   Users, AlertTriangle, Activity, MessageSquare, Ban, Trash2, 
-  CreditCard, ArrowUpDown, Search, ChevronDown, ChevronUp, X 
+  CreditCard, ArrowUpDown, Search, ChevronDown, ChevronUp, History, MessageCircle
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -18,6 +18,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [complaints, setComplaints] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
   const [subscriptionUsers, setSubscriptionUsers] = useState([]);
   const [planSettings, setPlanSettings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,10 +31,13 @@ const AdminDashboard = () => {
   // Modal states
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showActivateModal, setShowActivateModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUserForSub, setSelectedUserForSub] = useState(null);
-  const [communicationsToAdd, setCommunicationsToAdd] = useState(5);
+  const [selectedPlan, setSelectedPlan] = useState('Серебро');
+  const [subscriptionHistory, setSubscriptionHistory] = useState([]);
+  const [historyUser, setHistoryUser] = useState(null);
 
   useEffect(() => {
     if (!user?.email?.includes('admin')) {
@@ -46,21 +50,27 @@ const AdminDashboard = () => {
 
   const loadData = async () => {
     try {
-      const [statsRes, usersRes, complaintsRes, plansRes] = await Promise.all([
+      const [statsRes, usersRes, complaintsRes, plansRes, activeSubsRes] = await Promise.all([
         api.get('/admin/stats'),
         api.get('/admin/users'),
         api.get('/admin/complaints'),
-        api.get('/subscriptions/plans')
+        api.get('/subscriptions/plans'),
+        api.get('/admin/subscription/active-users')
       ]);
       
       setStats(statsRes.data);
       setUsers(usersRes.data);
       setComplaints(complaintsRes.data);
       setPlanSettings(plansRes.data.map(p => ({ ...p, enabled: p.enabled !== false })));
+      setSubscriptionUsers(activeSubsRes.data);
       
-      // Filter users with active subscriptions
-      const usersWithSubs = usersRes.data.filter(u => u.premium_count > 0);
-      setSubscriptionUsers(usersWithSubs);
+      // Try to load feedbacks
+      try {
+        const feedbackRes = await api.get('/admin/feedbacks');
+        setFeedbacks(feedbackRes.data || []);
+      } catch {
+        setFeedbacks([]);
+      }
     } catch (error) {
       toast.error('Ошибка загрузки данных');
     } finally {
@@ -94,21 +104,32 @@ const AdminDashboard = () => {
   const handleActivateSubscription = async () => {
     if (!selectedUserForSub) return;
     try {
-      await api.post(`/admin/subscription/activate?user_id=${selectedUserForSub.id}&communications=${communicationsToAdd}`);
-      toast.success(`Добавлено ${communicationsToAdd} общений`);
+      await api.post(`/admin/subscription/activate?user_id=${selectedUserForSub.id}&plan_name=${encodeURIComponent(selectedPlan)}`);
+      toast.success(`Тариф ${selectedPlan} активирован на 1 месяц`);
       setShowActivateModal(false);
       setSelectedUserForSub(null);
-      setCommunicationsToAdd(5);
+      setSelectedPlan('Серебро');
       loadData();
     } catch (error) {
       toast.error('Ошибка активации');
     }
   };
 
+  const handleViewHistory = async (userItem) => {
+    try {
+      const response = await api.get(`/admin/subscription/history/${userItem.id}`);
+      setSubscriptionHistory(response.data);
+      setHistoryUser(userItem);
+      setShowHistoryModal(true);
+    } catch (error) {
+      toast.error('Ошибка загрузки истории');
+    }
+  };
+
   const handleTogglePlan = async (planName) => {
     try {
       const plan = planSettings.find(p => p.name === planName);
-      await api.put(`/admin/subscription/toggle?plan_name=${planName}&enabled=${!plan.enabled}`);
+      await api.put(`/admin/subscription/toggle?plan_name=${encodeURIComponent(planName)}&enabled=${!plan.enabled}`);
       setPlanSettings(prev => prev.map(p => 
         p.name === planName ? { ...p, enabled: !p.enabled } : p
       ));
@@ -124,7 +145,7 @@ const AdminDashboard = () => {
       let aVal = a[sortField];
       let bVal = b[sortField];
       
-      if (sortField === 'created_at' || sortField === 'last_login') {
+      if (sortField === 'created_at' || sortField === 'last_login' || sortField === 'subscription_activated_at') {
         aVal = aVal ? new Date(aVal) : new Date(0);
         bVal = bVal ? new Date(bVal) : new Date(0);
       }
@@ -151,10 +172,10 @@ const AdminDashboard = () => {
   };
 
   const getSortIcon = (field) => {
-    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 opacity-30" />;
+    if (sortField !== field) return <ArrowUpDown className="w-3 h-3 ml-1 opacity-30" />;
     return sortDirection === 'asc' ? 
-      <ChevronUp className="w-4 h-4 ml-1" /> : 
-      <ChevronDown className="w-4 h-4 ml-1" />;
+      <ChevronUp className="w-3 h-3 ml-1" /> : 
+      <ChevronDown className="w-3 h-3 ml-1" />;
   };
 
   // Calculate column totals
@@ -190,26 +211,27 @@ const AdminDashboard = () => {
         <h1 className="text-3xl font-bold text-[#1F1F1F] mb-8">Админ Панель</h1>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-6 border-b border-[#E5E5E5] overflow-x-auto">
+        <div className="flex gap-2 mb-6 border-b border-[#E5E5E5] overflow-x-auto">
           {[
             { id: 'stats', label: 'Статистика', icon: Activity },
             { id: 'users', label: 'Пользователи', icon: Users },
             { id: 'subscriptions', label: 'Подписки', icon: CreditCard },
             { id: 'tariffs', label: 'Тарифы', icon: CreditCard },
-            { id: 'complaints', label: 'Жалобы', icon: AlertTriangle }
+            { id: 'complaints', label: 'Жалобы', icon: AlertTriangle },
+            { id: 'feedback', label: 'Обратная связь', icon: MessageCircle }
           ].map(tab => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${
+                className={`flex items-center gap-2 px-3 py-3 border-b-2 transition-colors whitespace-nowrap text-sm ${
                   activeTab === tab.id
                     ? 'border-[#1A73E8] text-[#1A73E8]'
                     : 'border-transparent text-[#7A7A7A] hover:text-[#1F1F1F]'
                 }`}
               >
-                <Icon className="w-5 h-5" />
+                <Icon className="w-4 h-4" />
                 {tab.label}
               </button>
             );
@@ -222,7 +244,7 @@ const AdminDashboard = () => {
             {[
               { label: 'Всего пользователей', value: stats.total_users, icon: Users, color: 'from-blue-500 to-blue-600' },
               { label: 'Заблокированы', value: stats.blocked_users, icon: Ban, color: 'from-red-500 to-red-600' },
-              { label: 'Всего совпадений', value: stats.total_matches, icon: MessageSquare, color: 'from-green-500 to-green-600' },
+              { label: 'Активных подписок', value: stats.active_subscriptions || 0, icon: CreditCard, color: 'from-green-500 to-green-600' },
               { label: 'Активных чатов', value: stats.active_matches, icon: Activity, color: 'from-purple-500 to-purple-600' },
               { label: 'Видео сессий', value: stats.total_video_sessions, icon: Activity, color: 'from-orange-500 to-orange-600' },
               { label: 'Жалоб', value: stats.total_complaints, icon: AlertTriangle, color: 'from-yellow-500 to-yellow-600' }
@@ -258,79 +280,103 @@ const AdminDashboard = () => {
             </div>
             
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full text-sm">
                 <thead className="bg-[#F6F7F9]">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-[#1F1F1F]">Имя</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-[#1F1F1F]">Email</th>
+                    <th className="px-3 py-3 text-left font-semibold text-[#1F1F1F]">Имя</th>
+                    <th className="px-3 py-3 text-left font-semibold text-[#1F1F1F]">Email</th>
                     <th 
-                      className="px-4 py-3 text-left text-sm font-semibold text-[#1F1F1F] cursor-pointer hover:bg-[#E5E5E5] transition-colors"
+                      className="px-3 py-3 text-left font-semibold text-[#1F1F1F] cursor-pointer hover:bg-[#E5E5E5]"
                       onClick={() => toggleSort('age')}
                     >
                       <div className="flex items-center">
-                        Возраст
+                        Возр.
                         {getSortIcon('age')}
                       </div>
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-[#1F1F1F]">Город</th>
                     <th 
-                      className="px-4 py-3 text-left text-sm font-semibold text-[#1F1F1F] cursor-pointer hover:bg-[#E5E5E5] transition-colors"
+                      className="px-3 py-3 text-left font-semibold text-[#1F1F1F] cursor-pointer hover:bg-[#E5E5E5]"
                       onClick={() => toggleSort('created_at')}
                     >
                       <div className="flex items-center">
-                        Регистрация
+                        Рег.
                         {getSortIcon('created_at')}
                       </div>
                     </th>
                     <th 
-                      className="px-4 py-3 text-left text-sm font-semibold text-[#1F1F1F] cursor-pointer hover:bg-[#E5E5E5] transition-colors"
+                      className="px-3 py-3 text-left font-semibold text-[#1F1F1F] cursor-pointer hover:bg-[#E5E5E5]"
                       onClick={() => toggleSort('last_login')}
                     >
                       <div className="flex items-center">
-                        Последний вход
+                        Вход
                         {getSortIcon('last_login')}
                       </div>
                     </th>
                     <th 
-                      className="px-4 py-3 text-left text-sm font-semibold text-[#1F1F1F] cursor-pointer hover:bg-[#E5E5E5] transition-colors"
+                      className="px-3 py-3 text-left font-semibold text-[#1F1F1F] cursor-pointer hover:bg-[#E5E5E5]"
+                      onClick={() => toggleSort('subscription_activated_at')}
+                    >
+                      <div className="flex items-center">
+                        Подписка
+                        {getSortIcon('subscription_activated_at')}
+                      </div>
+                    </th>
+                    <th 
+                      className="px-3 py-3 text-left font-semibold text-[#1F1F1F] cursor-pointer hover:bg-[#E5E5E5]"
                       onClick={() => toggleSort('complaint_count')}
                     >
                       <div className="flex items-center">
-                        Жалобы
+                        Жал.
                         {getSortIcon('complaint_count')}
                       </div>
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-[#1F1F1F]">Действия</th>
+                    <th className="px-3 py-3 text-left font-semibold text-[#1F1F1F]">Действия</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sortedUsers.map(u => (
                     <tr key={u.id} className="border-t border-[#E5E5E5] hover:bg-[#F6F7F9]">
-                      <td className="px-4 py-3 text-sm text-[#1F1F1F]">{u.name}</td>
-                      <td className="px-4 py-3 text-sm text-[#7A7A7A]">{u.email}</td>
-                      <td className="px-4 py-3 text-sm text-[#7A7A7A]">{u.age || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-[#7A7A7A]">{u.city || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-[#7A7A7A]">
+                      <td className="px-3 py-2 text-[#1F1F1F]">{u.name}</td>
+                      <td className="px-3 py-2 text-[#7A7A7A] text-xs">{u.email}</td>
+                      <td className="px-3 py-2 text-[#7A7A7A]">{u.age || '-'}</td>
+                      <td className="px-3 py-2 text-[#7A7A7A] text-xs">
                         {u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU') : '-'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-[#7A7A7A]">
+                      <td className="px-3 py-2 text-[#7A7A7A] text-xs">
                         {u.last_login ? new Date(u.last_login).toLocaleDateString('ru-RU') : '-'}
                       </td>
-                      <td className="px-4 py-3 text-sm">
+                      <td className="px-3 py-2 text-xs">
+                        {u.subscription_activated_at ? (
+                          <div className="flex items-center gap-1">
+                            <span className="text-green-600">
+                              {new Date(u.subscription_activated_at).toLocaleDateString('ru-RU')}
+                            </span>
+                            <button 
+                              onClick={() => handleViewHistory(u)}
+                              className="text-[#1A73E8] hover:text-[#1557B5]"
+                              title="История оплат"
+                            >
+                              <History className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ) : '-'}
+                      </td>
+                      <td className="px-3 py-2">
                         <span className={`px-2 py-1 rounded-full text-xs ${
                           u.complaint_count > 3 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
                         }`}>
                           {u.complaint_count}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2">
+                      <td className="px-3 py-2">
+                        <div className="flex gap-1">
                           <Button
                             onClick={() => handleBlockUser(u.id, u.blocked)}
                             variant={u.blocked ? 'outline' : 'destructive'}
                             size="sm"
+                            className="text-xs px-2 py-1 h-7"
                           >
-                            {u.blocked ? 'Разблок.' : 'Заблок.'}
+                            {u.blocked ? 'Разбл.' : 'Забл.'}
                           </Button>
                           <Button
                             onClick={() => {
@@ -339,9 +385,9 @@ const AdminDashboard = () => {
                             }}
                             variant="outline"
                             size="sm"
-                            className="text-red-500 border-red-500 hover:bg-red-50"
+                            className="text-red-500 border-red-500 hover:bg-red-50 px-2 py-1 h-7"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3 h-3" />
                           </Button>
                         </div>
                       </td>
@@ -350,17 +396,17 @@ const AdminDashboard = () => {
                 </tbody>
                 <tfoot className="bg-[#F6F7F9] border-t-2 border-[#E5E5E5]">
                   <tr>
-                    <td className="px-4 py-3 text-sm font-semibold text-[#1F1F1F]" colSpan={2}>
-                      Итого: {sortedUsers.length} пользователей
+                    <td className="px-3 py-3 font-semibold text-[#1F1F1F]" colSpan={2}>
+                      Итого: {sortedUsers.length}
                     </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-[#7A7A7A]">
-                      Ср.: {totals.avgAge}
+                    <td className="px-3 py-3 font-semibold text-[#7A7A7A]">
+                      Ср: {totals.avgAge}
                     </td>
-                    <td className="px-4 py-3" colSpan={3}></td>
-                    <td className="px-4 py-3 text-sm font-semibold text-[#7A7A7A]">
-                      Всего: {totals.totalComplaints}
+                    <td className="px-3 py-3" colSpan={3}></td>
+                    <td className="px-3 py-3 font-semibold text-[#7A7A7A]">
+                      {totals.totalComplaints}
                     </td>
-                    <td className="px-4 py-3"></td>
+                    <td className="px-3 py-3"></td>
                   </tr>
                 </tfoot>
               </table>
@@ -414,30 +460,50 @@ const AdminDashboard = () => {
                 <h3 className="text-lg font-semibold text-[#1F1F1F]">Пользователи с активными подписками</h3>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full text-sm">
                   <thead className="bg-[#F6F7F9]">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-[#1F1F1F]">Имя</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-[#1F1F1F]">Email</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-[#1F1F1F]">Премиум общения</th>
+                      <th className="px-4 py-3 text-left font-semibold text-[#1F1F1F]">Имя</th>
+                      <th className="px-4 py-3 text-left font-semibold text-[#1F1F1F]">Email</th>
+                      <th className="px-4 py-3 text-left font-semibold text-[#1F1F1F]">Подписка</th>
+                      <th className="px-4 py-3 text-left font-semibold text-[#1F1F1F]">Активирована</th>
+                      <th className="px-4 py-3 text-left font-semibold text-[#1F1F1F]">Истекает</th>
+                      <th className="px-4 py-3 text-left font-semibold text-[#1F1F1F]">История</th>
                     </tr>
                   </thead>
                   <tbody>
                     {subscriptionUsers.length === 0 ? (
                       <tr>
-                        <td colSpan={3} className="px-6 py-8 text-center text-[#7A7A7A]">
+                        <td colSpan={6} className="px-4 py-8 text-center text-[#7A7A7A]">
                           Нет пользователей с активными подписками
                         </td>
                       </tr>
                     ) : (
                       subscriptionUsers.map(u => (
                         <tr key={u.id} className="border-t border-[#E5E5E5]">
-                          <td className="px-6 py-4 text-sm text-[#1F1F1F]">{u.name}</td>
-                          <td className="px-6 py-4 text-sm text-[#7A7A7A]">{u.email}</td>
-                          <td className="px-6 py-4 text-sm">
+                          <td className="px-4 py-3 text-[#1F1F1F]">{u.name}</td>
+                          <td className="px-4 py-3 text-[#7A7A7A]">{u.email}</td>
+                          <td className="px-4 py-3">
                             <span className="px-3 py-1 rounded-full bg-green-100 text-green-700">
-                              {u.premium_count || 0}
+                              {u.active_subscription}
                             </span>
+                          </td>
+                          <td className="px-4 py-3 text-[#7A7A7A]">
+                            {u.subscription_activated_at ? new Date(u.subscription_activated_at).toLocaleDateString('ru-RU') : '-'}
+                          </td>
+                          <td className="px-4 py-3 text-[#7A7A7A]">
+                            {u.subscription_expires_at ? new Date(u.subscription_expires_at).toLocaleDateString('ru-RU') : '-'}
+                          </td>
+                          <td className="px-4 py-3">
+                            <Button
+                              onClick={() => handleViewHistory(u)}
+                              variant="outline"
+                              size="sm"
+                              className="text-xs"
+                            >
+                              <History className="w-4 h-4 mr-1" />
+                              История
+                            </Button>
                           </td>
                         </tr>
                       ))
@@ -478,8 +544,8 @@ const AdminDashboard = () => {
                       <CreditCard className="w-8 h-8 text-white" />
                     </div>
                     <h3 className="text-xl font-bold text-[#1F1F1F]">{plan.name}</h3>
-                    <p className="text-2xl font-bold text-[#1A73E8] mt-1">{plan.price} ₽</p>
-                    <p className="text-sm text-[#7A7A7A]">+{plan.communications} общений</p>
+                    <p className="text-2xl font-bold text-[#1A73E8] mt-1">{plan.price} ₽<span className="text-sm font-normal text-[#7A7A7A]"> в мес.</span></p>
+                    <p className="text-sm text-[#7A7A7A]">+{plan.communications} общений <span className="font-medium">в день</span></p>
                   </div>
 
                   {!plan.enabled && (
@@ -530,6 +596,44 @@ const AdminDashboard = () => {
                       {complaint.reason}
                     </p>
                   )}
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* Feedback Tab */}
+        {activeTab === 'feedback' && (
+          <div className="space-y-4">
+            {feedbacks.length === 0 ? (
+              <div className="bg-white rounded-2xl p-8 text-center">
+                <MessageCircle className="w-12 h-12 text-[#9AA0A6] mx-auto mb-4" />
+                <p className="text-[#7A7A7A]">Нет обратной связи</p>
+              </div>
+            ) : (
+              feedbacks.map(fb => (
+                <div key={fb.id} className="bg-white rounded-2xl p-6 shadow-sm">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        fb.type === 'bug' ? 'bg-red-100 text-red-700' :
+                        fb.type === 'idea' ? 'bg-blue-100 text-blue-700' :
+                        fb.type === 'suggestion' ? 'bg-green-100 text-green-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {fb.type === 'bug' ? 'Ошибка' :
+                         fb.type === 'idea' ? 'Идея' :
+                         fb.type === 'suggestion' ? 'Предложение' : 'Другое'}
+                      </span>
+                      <p className="text-xs text-[#7A7A7A] mt-2">От: {fb.user_id}</p>
+                    </div>
+                    <p className="text-xs text-[#B5B5B5]">
+                      {new Date(fb.created_at).toLocaleDateString('ru-RU')}
+                    </p>
+                  </div>
+                  <p className="text-[#1F1F1F] text-sm bg-[#F6F7F9] p-4 rounded-lg">
+                    {fb.message}
+                  </p>
                 </div>
               ))
             )}
@@ -590,14 +694,27 @@ const AdminDashboard = () => {
             </p>
             
             <div>
-              <label className="text-sm text-[#7A7A7A] mb-2 block">Количество общений</label>
-              <Input
-                type="number"
-                min={1}
-                max={100}
-                value={communicationsToAdd}
-                onChange={(e) => setCommunicationsToAdd(parseInt(e.target.value) || 5)}
-              />
+              <label className="text-sm text-[#7A7A7A] mb-2 block">Выберите тариф</label>
+              <div className="grid grid-cols-3 gap-2">
+                {['Серебро', 'Золото', 'VIP'].map(plan => (
+                  <button
+                    key={plan}
+                    onClick={() => setSelectedPlan(plan)}
+                    className={`p-3 rounded-xl border-2 transition-all text-center ${
+                      selectedPlan === plan
+                        ? 'border-[#1A73E8] bg-[#1A73E8]/10'
+                        : 'border-[#E5E5E5] hover:border-[#1A73E8]/50'
+                    }`}
+                  >
+                    <span className={`font-semibold ${selectedPlan === plan ? 'text-[#1A73E8]' : 'text-[#1F1F1F]'}`}>
+                      {plan}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-[#7A7A7A] text-center mt-2">
+                Тариф активируется на 1 месяц
+              </p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -616,6 +733,56 @@ const AdminDashboard = () => {
               Активировать
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Subscription History Modal */}
+      <Dialog open={showHistoryModal} onOpenChange={setShowHistoryModal}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-center" style={{ color: '#1F1F1F' }}>
+              История оплат
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-center text-[#7A7A7A] mb-4">
+              Пользователь: <span className="font-semibold text-[#1F1F1F]">{historyUser?.name}</span>
+            </p>
+            
+            {subscriptionHistory.length === 0 ? (
+              <p className="text-center text-[#7A7A7A]">Нет истории оплат</p>
+            ) : (
+              <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                {subscriptionHistory.map((item, index) => (
+                  <div key={index} className="bg-[#F6F7F9] p-4 rounded-xl">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="font-semibold text-[#1F1F1F]">{item.plan_name}</span>
+                        <p className="text-sm text-[#7A7A7A]">
+                          {item.price} ₽ • {item.communications_per_day} общений/день
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-[#7A7A7A]">
+                          {new Date(item.purchase_date).toLocaleDateString('ru-RU')}
+                        </p>
+                        <p className="text-xs text-[#B5B5B5]">
+                          {item.activated_by === 'admin' ? 'Админ' : 'Пользователь'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <Button
+            onClick={() => setShowHistoryModal(false)}
+            variant="outline"
+            className="w-full"
+          >
+            Закрыть
+          </Button>
         </DialogContent>
       </Dialog>
     </div>
