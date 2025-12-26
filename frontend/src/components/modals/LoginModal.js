@@ -24,7 +24,17 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister, onForgotPassword }) =
       onClose();
       navigate('/videochat');
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Ошибка входа');
+      console.error('Login error:', error);
+      const errorMessage = error.response?.data?.detail;
+      if (errorMessage === 'Invalid credentials') {
+        toast.error('Неверный email или пароль');
+      } else if (errorMessage === 'User not found') {
+        toast.error('Пользователь не найден. Зарегистрируйтесь.');
+      } else if (error.code === 'ERR_NETWORK') {
+        toast.error('Ошибка сети. Проверьте подключение.');
+      } else {
+        toast.error(errorMessage || 'Ошибка входа');
+      }
     } finally {
       setLoading(false);
     }
