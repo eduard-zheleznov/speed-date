@@ -4,7 +4,7 @@ from auth import get_current_user_id
 from database import (
     users_collection, complaints_collection, video_sessions_collection,
     matches_collection, daily_communications_collection, subscriptions_settings_collection,
-    user_subscriptions_collection, subscription_history_collection
+    user_subscriptions_collection, subscription_history_collection, feedback_collection
 )
 from datetime import datetime, timezone, timedelta
 from typing import List
