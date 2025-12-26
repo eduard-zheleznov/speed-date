@@ -265,9 +265,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Admin subscription activation flow"
-    - "Chat navigation on mobile"
-    - "Feedback submission"
+    - "Frontend testing (if needed)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
