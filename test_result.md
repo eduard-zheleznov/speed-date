@@ -116,31 +116,97 @@ backend:
     implemented: true
     working: true
     file: "/app/backend/routers/admin_router.py"
-    comment: "Admins can activate Серебро/Золото/VIP plans for users for 1 month"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Admins can activate Серебро/Золото/VIP plans for users for 1 month"
 
   - task: "Subscription history tracking"
     implemented: true
     working: true
     file: "/app/backend/routers/admin_router.py"
-    comment: "All subscription purchases are logged with dates and who activated"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "All subscription purchases are logged with dates and who activated"
 
   - task: "Active subscription users endpoint"
     implemented: true
     working: true
     file: "/app/backend/routers/admin_router.py"
-    comment: "Returns users with active subscriptions"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Returns users with active subscriptions"
 
   - task: "Feedback system"
     implemented: true
     working: true
     file: "/app/backend/routers/feedback_router.py"
-    comment: "Users can submit feedback (ideas, suggestions, bugs)"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Users can submit feedback (ideas, suggestions, bugs)"
 
   - task: "Chat with unread messages"
     implemented: true
     working: true
     file: "/app/backend/routers/chat_router.py"
-    comment: "Matches endpoint now returns unread_count and last_message"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Matches endpoint now returns unread_count and last_message"
+
+  - task: "Authentication system with error handling"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/auth_router.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "TESTED: Login with valid credentials working. Wrong password returns 'Invalid email or password'. GET /api/auth/me working correctly."
+
+  - task: "Photo upload with HEIC/HEIF support"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/profile_router.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "TESTED: JPEG/PNG upload working. HEIC→JPEG conversion, auto-rotation, resizing (max 1200px) all working. Photo deletion and set-main-photo working correctly."
+
+  - task: "Profile update with completion flag"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/profile_router.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "TESTED: Profile update working correctly. profile_completed flag set properly when all required fields are present."
 
 frontend:
   - task: "Admin panel subscriptions tab redesign"
