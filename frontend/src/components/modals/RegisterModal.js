@@ -32,7 +32,15 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
       onClose();
       navigate('/complete-profile');
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Ошибка регистрации');
+      console.error('Registration error:', error);
+      const errorMessage = error.response?.data?.detail;
+      if (errorMessage === 'Email already registered') {
+        toast.error('Этот email уже зарегистрирован. Войдите или используйте другой.');
+      } else if (error.code === 'ERR_NETWORK') {
+        toast.error('Ошибка сети. Проверьте подключение.');
+      } else {
+        toast.error(errorMessage || 'Ошибка регистрации');
+      }
     } finally {
       setLoading(false);
     }
