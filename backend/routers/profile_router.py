@@ -62,20 +62,70 @@ async def update_profile(profile_data: ProfileUpdate, user_id: str = Depends(get
 
 @router.post("/upload-photo")
 async def upload_photo(file: UploadFile = File(...), user_id: str = Depends(get_current_user_id)):
-    # Validate content type
-    if not file.content_type or not file.content_type.startswith('image/'):
+    # Validate content type - support HEIC/HEIF from iPhone
+    allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif']
+    
+    # Check if it's an image type
+    if not file.content_type or not (file.content_type.startswith('image/') or file.content_type in allowed_types):
         raise HTTPException(status_code=400, detail="Только изображения разрешены")
     
     # Read file
     contents = await file.read()
     
-    # Check size (max 5MB)
-    if len(contents) > 5 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="Файл слишком большой (макс 5МБ)")
+    # Check size (max 10MB for raw files, will be compressed)
+    if len(contents) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Файл слишком большой (макс 10МБ)")
     
-    # Convert to base64
-    base64_image = base64.b64encode(contents).decode('utf-8')
-    photo_url = f"data:{file.content_type};base64,{base64_image}"
+    try:
+        # Process image with Pillow (handles HEIC if pillow-heif is installed)
+        img = Image.open(io.BytesIO(contents))
+        
+        # Convert to RGB if necessary (for HEIC, RGBA, etc.)
+        if img.mode in ('RGBA', 'LA', 'P'):
+            # Create white background for transparency
+            background = Image.new('RGB', img.size, (255, 255, 255))
+            if img.mode == 'P':
+                img = img.convert('RGBA')
+            background.paste(img, mask=img.split()[-1] if img.mode in ('RGBA', 'LA') else None)
+            img = background
+        elif img.mode != 'RGB':
+            img = img.convert('RGB')
+        
+        # Resize if too large (max 1200px on longest side)
+        max_size = 1200
+        if img.width > max_size or img.height > max_size:
+            img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
+        
+        # Auto-rotate based on EXIF
+        try:
+            from PIL import ExifTags
+            for orientation in ExifTags.TAGS.keys():
+                if ExifTags.TAGS[orientation] == 'Orientation':
+                    break
+            exif = img._getexif()
+            if exif:
+                orientation_value = exif.get(orientation)
+                if orientation_value == 3:
+                    img = img.rotate(180, expand=True)
+                elif orientation_value == 6:
+                    img = img.rotate(270, expand=True)
+                elif orientation_value == 8:
+                    img = img.rotate(90, expand=True)
+        except (AttributeError, KeyError, IndexError):
+            pass
+        
+        # Save as JPEG with good quality
+        output = io.BytesIO()
+        img.save(output, format='JPEG', quality=85, optimize=True)
+        output.seek(0)
+        
+        # Convert to base64
+        base64_image = base64.b64encode(output.getvalue()).decode('utf-8')
+        photo_url = f"data:image/jpeg;base64,{base64_image}"
+        
+    except Exception as e:
+        print(f"Image processing error: {e}")
+        raise HTTPException(status_code=400, detail="Не удалось обработать изображение. Попробуйте другой файл.")
     
     # Get user
     user_dict = await users_collection.find_one({"id": user_id}, {"_id": 0})
