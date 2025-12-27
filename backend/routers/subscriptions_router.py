@@ -31,55 +31,77 @@ async def get_subscription_plans():
 
 @router.get("/my-status", response_model=CommunicationsStatus)
 async def get_my_subscription_status(user_id: str = Depends(get_current_user_id)):
-    today = datetime.now(timezone.utc).date().isoformat()
+    """
+    Get user's daily communications status.
+    Logic:
+    - Every user gets 5 FREE communications per day by default
+    - After midnight (00:00), the counter resets to 5 free + premium (if subscribed)
+    - Premium users get additional communications based on their plan
+    """
+    now = datetime.now(timezone.utc)
+    today = now.date().isoformat()
     
     # Check if user has active subscription
     user = await users_collection.find_one({"id": user_id}, {"_id": 0})
     active_plan = None
+    premium_count = 0
+    
     if user:
         expires_at = user.get("subscription_expires_at")
         if expires_at:
             if isinstance(expires_at, str):
                 expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
-            if expires_at > datetime.now(timezone.utc):
+            if expires_at > now:
                 active_plan = user.get("active_subscription")
+                # Get premium communications for active plan
+                plan = next((p for p in SUBSCRIPTION_PLANS if p.name == active_plan), None)
+                if plan:
+                    premium_count = plan.communications
     
-    # Get or create daily communications
+    # Get or create daily communications record
     comm_status = await daily_communications_collection.find_one({"user_id": user_id, "date": today}, {"_id": 0})
     
     if not comm_status:
-        # Determine premium count based on active subscription
-        premium_count = 0
-        if active_plan:
-            plan = next((p for p in SUBSCRIPTION_PLANS if p.name == active_plan), None)
-            if plan:
-                premium_count = plan.communications
-        
-        comm_status = {"user_id": user_id, "date": today, "free_count": 5, "premium_count": premium_count, "used_count": 0}
+        # New day - create fresh record with reset values
+        # FREE: 5 communications per day (always)
+        # PREMIUM: additional communications based on subscription
+        comm_status = {
+            "user_id": user_id, 
+            "date": today, 
+            "free_count": 5,  # Always 5 free per day
+            "premium_count": premium_count,  # Additional from subscription
+            "used_count": 0  # Reset to 0 at start of new day
+        }
         await daily_communications_collection.insert_one(comm_status)
     else:
-        # Update premium count if user has active subscription but daily record doesn't reflect it
-        if active_plan:
-            plan = next((p for p in SUBSCRIPTION_PLANS if p.name == active_plan), None)
-            if plan and comm_status.get("premium_count", 0) < plan.communications:
-                comm_status["premium_count"] = plan.communications
-                await daily_communications_collection.update_one(
-                    {"user_id": user_id, "date": today},
-                    {"$set": {"premium_count": plan.communications}}
-                )
+        # Existing record for today - check if premium needs updating
+        if active_plan and comm_status.get("premium_count", 0) < premium_count:
+            comm_status["premium_count"] = premium_count
+            await daily_communications_collection.update_one(
+                {"user_id": user_id, "date": today},
+                {"$set": {"premium_count": premium_count}}
+            )
     
-    remaining_free = max(0, comm_status["free_count"] - comm_status["used_count"])
+    # Calculate remaining communications
+    used = comm_status.get("used_count", 0)
+    free_available = comm_status.get("free_count", 5)
     premium_available = comm_status.get("premium_count", 0)
-    total_available = remaining_free + premium_available
     
-    # Calculate when it resets (midnight UTC)
-    tomorrow = datetime.now(timezone.utc).date()
-    tomorrow = datetime.combine(tomorrow, datetime.min.time()).replace(tzinfo=timezone.utc)
-    resets_at = (tomorrow.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)).isoformat()
+    # Free communications are used first
+    remaining_free = max(0, free_available - used)
+    # Premium is used only after free is exhausted
+    remaining_premium = premium_available if used < free_available else max(0, premium_available - (used - free_available))
+    
+    total_available = remaining_free + remaining_premium
+    
+    # Calculate reset time (next midnight UTC)
+    tomorrow = now.date() + timedelta(days=1)
+    reset_time = datetime.combine(tomorrow, datetime.min.time()).replace(tzinfo=timezone.utc)
+    resets_at = reset_time.isoformat()
     
     return CommunicationsStatus(
         remaining_free=remaining_free,
-        premium_available=premium_available,
+        premium_available=remaining_premium,
         total_available=total_available,
         resets_at=resets_at
     )
