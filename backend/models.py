@@ -51,6 +51,10 @@ class User(BaseModel):
     active_subscription: Optional[str] = None  # Current plan name or None
     subscription_expires_at: Optional[datetime] = None
     subscription_activated_at: Optional[datetime] = None
+    # Admin role fields
+    is_super_admin: bool = False
+    is_admin: bool = False
+    admin_permissions: List[str] = Field(default_factory=list)  # ['users', 'subscriptions', 'tariffs', 'complaints', 'feedback', 'stats']
 
 class UserPublic(BaseModel):
     id: str
