@@ -463,26 +463,76 @@ const AdminDashboard = () => {
                         </span>
                       </td>
                       <td className="px-3 py-2">
-                        <div className="flex gap-1">
-                          <Button
-                            onClick={() => handleBlockUser(u.id, u.blocked)}
-                            variant={u.blocked ? 'outline' : 'destructive'}
-                            size="sm"
-                            className="text-xs px-2 py-1 h-7"
-                          >
-                            {u.blocked ? 'Разбл.' : 'Забл.'}
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              setUserToDelete(u);
-                              setShowDeleteModal(true);
-                            }}
-                            variant="outline"
-                            size="sm"
-                            className="text-red-500 border-red-500 hover:bg-red-50 px-2 py-1 h-7"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
+                        <div className="flex gap-1 flex-wrap">
+                          {/* Показываем разные кнопки в зависимости от того, супер-админ это или нет */}
+                          {isProtectedAdmin(u.email) ? (
+                            <>
+                              <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs flex items-center gap-1">
+                                <Shield className="w-3 h-3" />
+                                Супер
+                              </span>
+                              <Button
+                                onClick={() => {
+                                  setUserForPassword(u);
+                                  setShowPasswordModal(true);
+                                }}
+                                variant="outline"
+                                size="sm"
+                                className="text-xs px-2 py-1 h-7"
+                              >
+                                <Key className="w-3 h-3 mr-1" />
+                                Пароль
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                onClick={() => handleBlockUser(u.id, u.blocked)}
+                                variant={u.blocked ? 'outline' : 'destructive'}
+                                size="sm"
+                                className="text-xs px-2 py-1 h-7"
+                              >
+                                {u.blocked ? 'Разбл.' : 'Забл.'}
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  setUserToDelete(u);
+                                  setShowDeleteModal(true);
+                                }}
+                                variant="outline"
+                                size="sm"
+                                className="text-red-500 border-red-500 hover:bg-red-50 px-2 py-1 h-7"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                              {/* Показать кнопку назначения админа только супер-админу */}
+                              {isSuperAdmin && (
+                                <Button
+                                  onClick={() => {
+                                    if (u.is_admin) {
+                                      handleRemoveAdminRole(u.id);
+                                    } else {
+                                      setUserForRole(u);
+                                      setSelectedPermissions([]);
+                                      setShowAdminRoleModal(true);
+                                    }
+                                  }}
+                                  variant="outline"
+                                  size="sm"
+                                  className={`text-xs px-2 py-1 h-7 ${u.is_admin ? 'border-purple-500 text-purple-500' : ''}`}
+                                  title={u.is_admin ? 'Снять админа' : 'Сделать админом'}
+                                >
+                                  <UserCog className="w-3 h-3" />
+                                </Button>
+                              )}
+                              {/* Показать бейдж админа если пользователь - админ */}
+                              {u.is_admin && (
+                                <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                                  Админ
+                                </span>
+                              )}
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
