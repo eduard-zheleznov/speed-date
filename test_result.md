@@ -208,6 +208,54 @@ backend:
         -agent: "testing"
         -comment: "TESTED: Profile update working correctly. profile_completed flag set properly when all required fields are present."
 
+  - task: "Admin protection system"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/admin_router.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "TESTED: Super admin (admin@test.com) cannot be blocked or deleted. Returns 403 'Невозможно заблокировать супер-администратора' and 'Невозможно удалить супер-администратора' as expected."
+
+  - task: "Admin role management"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/admin_router.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "TESTED: PUT /api/admin/user/{user_id}/admin-role working correctly. Can assign admin roles with specific permissions. GET /api/admin/admins returns list of all admins (found 2 admins)."
+
+  - task: "Admin password change functionality"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/admin_router.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "TESTED: POST /api/admin/user/change-password working correctly. Admin can change passwords for any user."
+
+  - task: "Daily communications reset logic"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/subscriptions_router.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "TESTED: GET /api/subscriptions/my-status working correctly. Returns remaining_free: 5, premium_available based on subscription, resets_at: next midnight. Daily reset logic functioning properly."
+
 frontend:
   - task: "Admin panel subscriptions tab redesign"
     implemented: true
