@@ -97,12 +97,19 @@ const AdminDashboard = () => {
   };
 
   const handleBlockUser = async (userId, blocked) => {
+    // Find the user to check if they're the super admin
+    const targetUser = users.find(u => u.id === userId);
+    if (targetUser && isProtectedAdmin(targetUser.email)) {
+      toast.error('Невозможно заблокировать супер-администратора');
+      return;
+    }
+    
     try {
       await api.put(`/admin/user/${userId}/block?blocked=${!blocked}`);
       toast.success(`Пользователь ${!blocked ? 'заблокирован' : 'разблокирован'}`);
       loadData();
     } catch (error) {
-      toast.error('Ошибка');
+      toast.error(error.response?.data?.detail || 'Ошибка');
     }
   };
 
