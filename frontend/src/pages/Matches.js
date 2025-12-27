@@ -41,15 +41,17 @@ const Matches = () => {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#F8F9FA] via-white to-[#F0F4FF]" />
-      <div className="absolute top-20 left-10 w-72 h-72 bg-[#4ECDC4]/10 rounded-full blur-3xl animate-pulse" />
+    <div className="min-h-screen flex flex-col">
+      {/* Fixed Navigation - always on top */}
+      <NavigationBar />
       
-      <div className="relative z-10 flex flex-col min-h-screen">
-        <NavigationBar />
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto relative">
+        {/* Animated background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#F8F9FA] via-white to-[#F0F4FF] pointer-events-none" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-[#4ECDC4]/10 rounded-full blur-3xl animate-pulse pointer-events-none" />
         
-        <div className="flex-1 p-4">
+        <div className="relative z-10 p-4">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-[#1F1F1F] mb-6" style={{ fontFamily: 'Manrope, sans-serif' }}>
             Мои чаты
