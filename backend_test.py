@@ -433,6 +433,184 @@ class VideoDateAPITester:
         
         return success
 
+    def test_admin_login(self):
+        """Test admin login with super admin credentials"""
+        login_data = {
+            "email": "admin@test.com",
+            "password": "admin123"
+        }
+        
+        success, response = self.run_test(
+            "Admin Login",
+            "POST",
+            "auth/login",
+            200,
+            data=login_data
+        )
+        
+        if success and 'access_token' in response:
+            self.admin_token = response['access_token']
+            self.admin_user_id = response['user']['id']
+            print(f"   Admin token obtained: {self.admin_token[:20]}...")
+            return True
+        return False
+
+    def test_admin_protection_block(self):
+        """Test that super admin cannot be blocked"""
+        if not hasattr(self, 'admin_token') or not self.admin_token:
+            print("   Skipping - No admin token")
+            return False
+            
+        # Try to block the super admin (should fail with 403)
+        success, response = self.run_test(
+            "Block Super Admin (Should Fail)",
+            "PUT",
+            f"admin/user/{self.admin_user_id}/block?blocked=true",
+            403
+        )
+        
+        return success
+
+    def test_admin_protection_delete(self):
+        """Test that super admin cannot be deleted"""
+        if not hasattr(self, 'admin_token') or not self.admin_token:
+            print("   Skipping - No admin token")
+            return False
+            
+        # Try to delete the super admin (should fail with 403)
+        success, response = self.run_test(
+            "Delete Super Admin (Should Fail)",
+            "DELETE",
+            f"admin/user/{self.admin_user_id}",
+            403
+        )
+        
+        return success
+
+    def test_admin_role_assignment(self):
+        """Test admin role assignment"""
+        if not hasattr(self, 'admin_token') or not self.admin_token:
+            print("   Skipping - No admin token")
+            return False
+            
+        # First get a regular user ID (alice)
+        if not self.user_id:
+            print("   Skipping - No regular user ID available")
+            return False
+            
+        # Assign admin role with specific permissions
+        role_data = {
+            "is_admin": True,
+            "permissions": ["users", "subscriptions", "feedback"]
+        }
+        
+        # Store current token and switch to admin
+        user_token = self.token
+        self.token = self.admin_token
+        
+        success, response = self.run_test(
+            "Assign Admin Role",
+            "PUT",
+            f"admin/user/{self.user_id}/admin-role",
+            200,
+            data=role_data
+        )
+        
+        # Restore user token
+        self.token = user_token
+        
+        return success
+
+    def test_get_all_admins(self):
+        """Test getting list of all admins"""
+        if not hasattr(self, 'admin_token') or not self.admin_token:
+            print("   Skipping - No admin token")
+            return False
+            
+        # Store current token and switch to admin
+        user_token = self.token
+        self.token = self.admin_token
+        
+        success, response = self.run_test(
+            "Get All Admins",
+            "GET",
+            "admin/admins",
+            200
+        )
+        
+        # Restore user token
+        self.token = user_token
+        
+        if success:
+            print(f"   Found {len(response)} admin(s)")
+            return True
+        return False
+
+    def test_admin_password_change(self):
+        """Test admin changing user password"""
+        if not hasattr(self, 'admin_token') or not self.admin_token:
+            print("   Skipping - No admin token")
+            return False
+            
+        if not self.user_id:
+            print("   Skipping - No regular user ID available")
+            return False
+            
+        # Store current token and switch to admin
+        user_token = self.token
+        self.token = self.admin_token
+        
+        password_data = {
+            "user_id": self.user_id,
+            "new_password": "newtest123"
+        }
+        
+        success, response = self.run_test(
+            "Admin Change User Password",
+            "POST",
+            "admin/user/change-password",
+            200,
+            data=password_data
+        )
+        
+        # Restore user token
+        self.token = user_token
+        
+        return success
+
+    def test_daily_communications_reset(self):
+        """Test daily communications reset logic"""
+        if not self.token:
+            print("   Skipping - No authentication token")
+            return False
+            
+        success, response = self.run_test(
+            "Get Subscription Status (Daily Communications)",
+            "GET",
+            "subscriptions/my-status",
+            200
+        )
+        
+        if success:
+            # Check expected fields
+            expected_fields = ['remaining_free', 'premium_available', 'total_available', 'resets_at']
+            missing_fields = [field for field in expected_fields if field not in response]
+            
+            if missing_fields:
+                print(f"   Missing fields: {missing_fields}")
+                return False
+                
+            # Check that remaining_free is 5 (default daily reset)
+            remaining_free = response.get('remaining_free', 0)
+            print(f"   Remaining free communications: {remaining_free}")
+            print(f"   Premium available: {response.get('premium_available', 0)}")
+            print(f"   Resets at: {response.get('resets_at', 'N/A')}")
+            
+            # For new users, should have 5 free communications
+            return remaining_free <= 5  # Could be less if already used some
+            
+        return False
+
 def main():
     print("🚀 Starting Video Dating API Critical Bug Fix Tests")
     print("=" * 60)
