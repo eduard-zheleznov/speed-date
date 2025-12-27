@@ -315,21 +315,34 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      Fixed critical bugs reported by user:
+      Implemented user requested features:
       
-      1. FIXED: Registration checkbox "Script Error" - replaced Radix UI Checkbox with native HTML input
-      2. FIXED: Login error handling - improved error messages in Russian
-      3. FIXED: Photo upload for iPhone (HEIC/HEIF) - added Pillow + pillow-heif for image conversion
-         - Now converts HEIC to JPEG
-         - Auto-rotates based on EXIF
-         - Resizes large images (max 1200px)
-         - Compresses to JPEG with quality=85
+      1. ADMIN PROTECTION:
+         - Super admin (admin@test.com) cannot be blocked or deleted
+         - Instead shows "Супер" badge and "Пароль" button for password change
+         - Backend validates and rejects attempts to block/delete super admin
+      
+      2. ADMIN ROLE MANAGEMENT:
+         - Super admin can assign other users as admins
+         - Can select specific permissions (users, subscriptions, tariffs, complaints, feedback, stats)
+         - Added new API endpoints: PUT /admin/user/{id}/admin-role, POST /admin/user/change-password
+      
+      3. FIXED NAVIGATION:
+         - NavigationBar already has sticky top-0 z-50
+         - Updated Matches.js page structure for proper scrolling behavior
+         - Content scrolls while navigation stays fixed
+      
+      4. DAILY COMMUNICATIONS RESET:
+         - 5 FREE communications per day for everyone
+         - After midnight (00:00 UTC), counter resets to 5 free + premium
+         - Premium users get additional communications based on plan
+         - Logic implemented in subscriptions_router.py
       
       Testing needed:
-      - Full registration flow
-      - Login with correct/wrong credentials
-      - Photo upload (various formats including HEIC)
-      - Profile photo management (set main, delete)
+      - Admin protection (try to block/delete admin@test.com)
+      - Admin role assignment
+      - Password change for admin
+      - Navigation scrolling on pages with lots of content
   - agent: "testing"
     message: |
       BACKEND TESTING COMPLETED - Critical bug fixes verified:
