@@ -10,7 +10,9 @@ class VideoDateAPITester:
     def __init__(self, base_url="https://datemeet-7.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
+        self.admin_token = None
         self.user_id = None
+        self.admin_user_id = None
         self.tests_run = 0
         self.tests_passed = 0
         self.failed_tests = []
