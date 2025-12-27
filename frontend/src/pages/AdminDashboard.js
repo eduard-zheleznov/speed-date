@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import NavigationBar from '../components/NavigationBar';
 import { 
   Users, AlertTriangle, Activity, MessageSquare, Ban, Trash2, 
-  CreditCard, ArrowUpDown, Search, ChevronDown, ChevronUp, History, MessageCircle
+  CreditCard, ArrowUpDown, Search, ChevronDown, ChevronUp, History, MessageCircle, 
+  Key, Shield, UserCog
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
