@@ -99,6 +99,10 @@ async def block_user(user_id: str, blocked: bool, admin_id: str = Depends(is_adm
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
+    # Protect super admin from being blocked
+    if is_protected_admin(user.get("email", "")):
+        raise HTTPException(status_code=403, detail="Невозможно заблокировать супер-администратора")
+    
     await users_collection.update_one(
         {"id": user_id},
         {"$set": {"blocked": blocked}}
@@ -111,6 +115,10 @@ async def delete_user(user_id: str, admin_id: str = Depends(is_admin)):
     user = await users_collection.find_one({"id": user_id}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    
+    # Protect super admin from being deleted
+    if is_protected_admin(user.get("email", "")):
+        raise HTTPException(status_code=403, detail="Невозможно удалить супер-администратора")
     
     # Delete user and related data
     await users_collection.delete_one({"id": user_id})
