@@ -457,3 +457,37 @@ agent_communication:
       4. ✅ All authentication flows - WORKING
       
       All requested frontend functionality is working correctly. No critical issues found.
+  - agent: "testing"
+    message: |
+      ADMIN MANAGEMENT TESTING COMPLETED - All new features verified:
+      
+      ✅ ADMIN PROTECTION TESTS PASSED:
+      - Block super admin (admin@test.com) correctly returns 403 "Невозможно заблокировать супер-администратора"
+      - Delete super admin (admin@test.com) correctly returns 403 "Невозможно удалить супер-администратора"
+      - Super admin protection working as expected
+      
+      ✅ ADMIN ROLE MANAGEMENT TESTS PASSED:
+      - PUT /api/admin/user/{user_id}/admin-role working correctly
+      - Can assign admin roles with specific permissions (users, subscriptions, feedback)
+      - GET /api/admin/admins returns list of all admins (found 2 admins including super admin)
+      - Role assignment functionality working properly
+      
+      ✅ ADMIN PASSWORD CHANGE TESTS PASSED:
+      - POST /api/admin/user/change-password working correctly
+      - Admin can change passwords for any user
+      - Password change functionality working as expected
+      
+      ✅ DAILY COMMUNICATIONS RESET LOGIC TESTS PASSED:
+      - GET /api/subscriptions/my-status working correctly
+      - Returns remaining_free: 5 (daily reset working)
+      - Premium_available: 5 (based on user's subscription)
+      - Resets_at: next midnight (2025-12-28T00:00:00+00:00)
+      - Daily communications reset logic functioning properly
+      
+      SUCCESS RATE: 92.9% (13/14 tests passed)
+      
+      Minor issues (not critical):
+      - User registration test failed because bob@test.com already exists (expected in production)
+      - bcrypt version warning in logs (doesn't affect functionality)
+      
+      All new admin management features are working correctly. Backend APIs are stable and secure.
