@@ -614,12 +614,12 @@ class VideoDateAPITester:
         return False
 
 def main():
-    print("🚀 Starting Video Dating API Critical Bug Fix Tests")
+    print("🚀 Starting Video Dating API Admin Management Tests")
     print("=" * 60)
     
     tester = VideoDateAPITester()
     
-    # Test sequence focusing on critical bug fixes
+    # Test sequence focusing on admin management features
     tests = [
         ("Root Endpoint", tester.test_root_endpoint),
         
@@ -629,14 +629,23 @@ def main():
         ("Login Wrong Password", tester.test_login_wrong_password),
         ("Get Current User", tester.test_get_current_user_auth),
         
-        # Profile Photo Upload Tests
-        ("Upload JPEG Photo", tester.test_photo_upload_jpeg),
-        ("Upload PNG Photo", tester.test_photo_upload_png),
-        ("Photo Size Limit Test", tester.test_photo_upload_size_limit),
-        ("Set Main Photo", tester.test_set_main_photo),
-        ("Delete Photo", tester.test_delete_photo),
+        # Admin Authentication
+        ("Admin Login", tester.test_admin_login),
         
-        # Profile Update Tests
+        # Admin Protection Tests
+        ("Admin Protection - Block Test", tester.test_admin_protection_block),
+        ("Admin Protection - Delete Test", tester.test_admin_protection_delete),
+        
+        # Admin Role Management Tests
+        ("Admin Role Assignment", tester.test_admin_role_assignment),
+        ("Get All Admins", tester.test_get_all_admins),
+        ("Admin Password Change", tester.test_admin_password_change),
+        
+        # Daily Communications Reset Logic
+        ("Daily Communications Reset", tester.test_daily_communications_reset),
+        
+        # Previous critical tests (keeping for regression)
+        ("Upload JPEG Photo", tester.test_photo_upload_jpeg),
         ("Profile Update Complete", tester.test_profile_update_complete),
     ]
     
