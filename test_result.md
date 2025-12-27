@@ -355,7 +355,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All critical frontend testing completed"
+    - "Admin management testing completed"
   stuck_tasks: []
   test_all: false
   test_priority: "completed"
