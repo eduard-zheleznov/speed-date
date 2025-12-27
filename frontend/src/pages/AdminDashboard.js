@@ -115,6 +115,15 @@ const AdminDashboard = () => {
 
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
+    
+    // Check if trying to delete super admin
+    if (isProtectedAdmin(userToDelete.email)) {
+      toast.error('Невозможно удалить супер-администратора');
+      setShowDeleteModal(false);
+      setUserToDelete(null);
+      return;
+    }
+    
     try {
       await api.delete(`/admin/user/${userToDelete.id}`);
       toast.success('Пользователь удалён');
@@ -122,8 +131,68 @@ const AdminDashboard = () => {
       setUserToDelete(null);
       loadData();
     } catch (error) {
-      toast.error('Ошибка удаления');
+      toast.error(error.response?.data?.detail || 'Ошибка удаления');
     }
+  };
+
+  const handleChangePassword = async () => {
+    if (!userForPassword || !newPassword) return;
+    if (newPassword.length < 6) {
+      toast.error('Пароль должен быть не менее 6 символов');
+      return;
+    }
+    
+    try {
+      await api.post('/admin/user/change-password', {
+        user_id: userForPassword.id,
+        new_password: newPassword
+      });
+      toast.success('Пароль успешно изменён');
+      setShowPasswordModal(false);
+      setUserForPassword(null);
+      setNewPassword('');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Ошибка смены пароля');
+    }
+  };
+
+  const handleSetAdminRole = async () => {
+    if (!userForRole) return;
+    
+    try {
+      await api.put(`/admin/user/${userForRole.id}/admin-role`, {
+        is_admin: true,
+        permissions: selectedPermissions
+      });
+      toast.success('Права администратора назначены');
+      setShowAdminRoleModal(false);
+      setUserForRole(null);
+      setSelectedPermissions([]);
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Ошибка назначения роли');
+    }
+  };
+
+  const handleRemoveAdminRole = async (userId) => {
+    try {
+      await api.put(`/admin/user/${userId}/admin-role`, {
+        is_admin: false,
+        permissions: []
+      });
+      toast.success('Права администратора сняты');
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Ошибка');
+    }
+  };
+
+  const togglePermission = (permission) => {
+    setSelectedPermissions(prev => 
+      prev.includes(permission) 
+        ? prev.filter(p => p !== permission)
+        : [...prev, permission]
+    );
   };
 
   const handleActivateSubscription = async () => {
