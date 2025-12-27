@@ -39,6 +39,23 @@ const AdminDashboard = () => {
   const [selectedPlan, setSelectedPlan] = useState('Серебро');
   const [subscriptionHistory, setSubscriptionHistory] = useState([]);
   const [historyUser, setHistoryUser] = useState(null);
+  
+  // Password change modal
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [userForPassword, setUserForPassword] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  
+  // Admin role modal
+  const [showAdminRoleModal, setShowAdminRoleModal] = useState(false);
+  const [userForRole, setUserForRole] = useState(null);
+  const [selectedPermissions, setSelectedPermissions] = useState([]);
+  
+  // Super admin email (protected)
+  const SUPER_ADMIN_EMAIL = 'admin@test.com';
+  const ALL_PERMISSIONS = ['users', 'subscriptions', 'tariffs', 'complaints', 'feedback', 'stats'];
+  
+  const isSuperAdmin = user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase();
+  const isProtectedAdmin = (userEmail) => userEmail?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase();
 
   useEffect(() => {
     if (!user?.email?.includes('admin')) {
