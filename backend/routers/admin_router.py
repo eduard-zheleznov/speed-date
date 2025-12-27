@@ -259,3 +259,90 @@ async def get_all_feedbacks(admin_id: str = Depends(is_admin)):
     """Get all user feedbacks"""
     feedbacks = await feedback_collection.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
     return feedbacks
+
+# ============== ADMIN MANAGEMENT ENDPOINTS ==============
+
+@router.get("/permissions")
+async def get_admin_permissions():
+    """Get list of all available admin permissions"""
+    return {
+        "permissions": ADMIN_PERMISSIONS,
+        "descriptions": {
+            "users": "Управление пользователями",
+            "subscriptions": "Управление подписками",
+            "tariffs": "Управление тарифами",
+            "complaints": "Просмотр жалоб",
+            "feedback": "Просмотр обратной связи",
+            "stats": "Просмотр статистики"
+        }
+    }
+
+@router.put("/user/{user_id}/admin-role")
+async def set_admin_role(user_id: str, role_data: AdminRoleUpdate, super_admin_id: str = Depends(is_super_admin)):
+    """Set or remove admin role for a user (super admin only)"""
+    user = await users_collection.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Cannot modify super admin's role
+    if is_protected_admin(user.get("email", "")):
+        raise HTTPException(status_code=403, detail="Невозможно изменить роль супер-администратора")
+    
+    # Validate permissions
+    valid_permissions = [p for p in role_data.permissions if p in ADMIN_PERMISSIONS]
+    
+    await users_collection.update_one(
+        {"id": user_id},
+        {"$set": {
+            "is_admin": role_data.is_admin,
+            "admin_permissions": valid_permissions if role_data.is_admin else []
+        }}
+    )
+    
+    return {
+        "message": f"Роль администратора {'назначена' if role_data.is_admin else 'снята'}",
+        "permissions": valid_permissions
+    }
+
+@router.post("/user/change-password")
+async def admin_change_user_password(data: AdminPasswordChange, admin_id: str = Depends(is_admin)):
+    """Change password for any user (admin only)"""
+    user = await users_collection.find_one({"id": data.user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Hash new password
+    new_hash = get_password_hash(data.new_password)
+    
+    await users_collection.update_one(
+        {"id": data.user_id},
+        {"$set": {"password_hash": new_hash}}
+    )
+    
+    return {"message": "Пароль успешно изменён"}
+
+@router.get("/admins")
+async def get_all_admins(super_admin_id: str = Depends(is_super_admin)):
+    """Get list of all admins (super admin only)"""
+    admins = await users_collection.find(
+        {"$or": [
+            {"is_admin": True},
+            {"is_super_admin": True},
+            {"email": {"$regex": "admin", "$options": "i"}}
+        ]},
+        {"_id": 0, "password_hash": 0}
+    ).to_list(100)
+    
+    result = []
+    for admin in admins:
+        is_super = admin.get("email", "").lower() == SUPER_ADMIN_EMAIL.lower() or admin.get("is_super_admin", False)
+        result.append({
+            "id": admin.get("id"),
+            "email": admin.get("email"),
+            "name": admin.get("name"),
+            "is_super_admin": is_super,
+            "is_admin": admin.get("is_admin", False) or is_super,
+            "admin_permissions": admin.get("admin_permissions", ADMIN_PERMISSIONS if is_super else [])
+        })
+    
+    return result
