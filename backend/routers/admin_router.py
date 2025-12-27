@@ -1,13 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends
 from models import User, Complaint, SubscriptionHistory
-from auth import get_current_user_id
+from auth import get_current_user_id, get_password_hash
 from database import (
     users_collection, complaints_collection, video_sessions_collection,
     matches_collection, daily_communications_collection, subscriptions_settings_collection,
     user_subscriptions_collection, subscription_history_collection, feedback_collection
 )
 from datetime import datetime, timezone, timedelta
-from typing import List
+from typing import List, Optional
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -17,13 +18,51 @@ SUBSCRIPTION_PLANS = {
     "VIP": {"price": 1900, "communications": 20}
 }
 
+# All available admin permissions
+ADMIN_PERMISSIONS = ['users', 'subscriptions', 'tariffs', 'complaints', 'feedback', 'stats']
+
+# Super admin email - the main admin that cannot be modified
+SUPER_ADMIN_EMAIL = "admin@test.com"
+
+class AdminRoleUpdate(BaseModel):
+    is_admin: bool
+    permissions: List[str] = []
+
+class AdminPasswordChange(BaseModel):
+    user_id: str
+    new_password: str
+
 # Simple admin check - in production, add proper role-based auth
 async def is_admin(user_id: str = Depends(get_current_user_id)):
-    # For now, check if email contains 'admin'
     user = await users_collection.find_one({"id": user_id}, {"_id": 0})
-    if not user or "admin" not in user.get("email", "").lower():
+    if not user:
         raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Check if user is super admin or has admin role
+    is_super = user.get("email", "").lower() == SUPER_ADMIN_EMAIL.lower()
+    has_admin_role = user.get("is_admin", False) or user.get("is_super_admin", False)
+    legacy_admin = "admin" in user.get("email", "").lower()
+    
+    if not (is_super or has_admin_role or legacy_admin):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
     return user_id
+
+async def is_super_admin(user_id: str = Depends(get_current_user_id)):
+    """Check if user is the super admin"""
+    user = await users_collection.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=403, detail="Super admin access required")
+    
+    is_super = user.get("email", "").lower() == SUPER_ADMIN_EMAIL.lower() or user.get("is_super_admin", False)
+    if not is_super:
+        raise HTTPException(status_code=403, detail="Super admin access required")
+    
+    return user_id
+
+def is_protected_admin(user_email: str) -> bool:
+    """Check if user is the protected super admin"""
+    return user_email.lower() == SUPER_ADMIN_EMAIL.lower()
 
 @router.get("/users", response_model=List[User])
 async def get_all_users(admin_id: str = Depends(is_admin)):
