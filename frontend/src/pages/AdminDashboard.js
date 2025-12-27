@@ -929,6 +929,140 @@ const AdminDashboard = () => {
           </Button>
         </DialogContent>
       </Dialog>
+
+      {/* Password Change Modal */}
+      <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-center" style={{ color: '#1F1F1F' }}>
+              Смена пароля
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-center text-[#7A7A7A]">
+              Пользователь: <span className="font-semibold text-[#1F1F1F]">{userForPassword?.name}</span>
+            </p>
+            <p className="text-center text-[#7A7A7A] text-sm">
+              {userForPassword?.email}
+            </p>
+            
+            <div>
+              <label className="text-sm text-[#7A7A7A] mb-2 block">Новый пароль</label>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Минимум 6 символов"
+                minLength={6}
+              />
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => {
+                setShowPasswordModal(false);
+                setUserForPassword(null);
+                setNewPassword('');
+              }}
+              variant="outline"
+              className="flex-1"
+            >
+              Отмена
+            </Button>
+            <Button
+              onClick={handleChangePassword}
+              className="flex-1"
+              style={{ background: 'linear-gradient(135deg, #1A73E8 0%, #6A9EFF 100%)' }}
+            >
+              Изменить
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Admin Role Modal */}
+      <Dialog open={showAdminRoleModal} onOpenChange={setShowAdminRoleModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-center" style={{ color: '#1F1F1F' }}>
+              Назначить администратором
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-center text-[#7A7A7A]">
+              Пользователь: <span className="font-semibold text-[#1F1F1F]">{userForRole?.name}</span>
+            </p>
+            <p className="text-center text-[#7A7A7A] text-sm">
+              {userForRole?.email}
+            </p>
+            
+            <div>
+              <label className="text-sm text-[#7A7A7A] mb-3 block font-medium">
+                Выберите разделы доступа:
+              </label>
+              <div className="space-y-2">
+                {ALL_PERMISSIONS.map(permission => {
+                  const labels = {
+                    users: 'Пользователи',
+                    subscriptions: 'Подписки',
+                    tariffs: 'Тарифы',
+                    complaints: 'Жалобы',
+                    feedback: 'Обратная связь',
+                    stats: 'Статистика'
+                  };
+                  return (
+                    <label 
+                      key={permission}
+                      className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                        selectedPermissions.includes(permission)
+                          ? 'border-[#1A73E8] bg-[#1A73E8]/10'
+                          : 'border-[#E5E5E5] hover:border-[#1A73E8]/50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedPermissions.includes(permission)}
+                        onChange={() => togglePermission(permission)}
+                        className="w-4 h-4 rounded border-gray-300 text-[#1A73E8] focus:ring-[#1A73E8]"
+                      />
+                      <span className={`font-medium ${selectedPermissions.includes(permission) ? 'text-[#1A73E8]' : 'text-[#1F1F1F]'}`}>
+                        {labels[permission]}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+              <button
+                onClick={() => setSelectedPermissions(selectedPermissions.length === ALL_PERMISSIONS.length ? [] : [...ALL_PERMISSIONS])}
+                className="text-sm text-[#1A73E8] hover:underline mt-2"
+              >
+                {selectedPermissions.length === ALL_PERMISSIONS.length ? 'Снять все' : 'Выбрать все'}
+              </button>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => {
+                setShowAdminRoleModal(false);
+                setUserForRole(null);
+                setSelectedPermissions([]);
+              }}
+              variant="outline"
+              className="flex-1"
+            >
+              Отмена
+            </Button>
+            <Button
+              onClick={handleSetAdminRole}
+              disabled={selectedPermissions.length === 0}
+              className="flex-1"
+              style={{ background: 'linear-gradient(135deg, #7B61FF 0%, #E056FD 100%)' }}
+            >
+              Назначить
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
