@@ -16,11 +16,16 @@ const Filters = () => {
   const [loading, setLoading] = useState(false);
   const [citySearch, setCitySearch] = useState('');
   const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [hasSubscription, setHasSubscription] = useState(false);
   const [formData, setFormData] = useState({
     age_range: '25-35',
     gender_preference: 'female',
     city: '',
-    smoking_preference: 'any'
+    smoking_preference: 'any',
+    // Premium filters
+    height_range: 'any',
+    weight_range: 'any',
+    education_preference: 'any'
   });
 
   useEffect(() => {
@@ -29,12 +34,23 @@ const Filters = () => {
       return;
     }
     loadFilters();
+    checkSubscription();
   }, [user, navigate]);
+
+  const checkSubscription = async () => {
+    try {
+      const response = await api.get('/subscriptions/my-status');
+      // User has premium if they have premium_available > 0
+      setHasSubscription(response.data.premium_available > 0);
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+    }
+  };
 
   const loadFilters = async () => {
     try {
       const response = await api.get('/filters');
-      setFormData(response.data);
+      setFormData(prev => ({ ...prev, ...response.data }));
       setCitySearch(response.data.city || '');
     } catch (error) {
       console.error('Error loading filters:', error);
