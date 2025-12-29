@@ -319,18 +319,16 @@ const Profile = () => {
                     <SelectValue placeholder="Выберите..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="secondary">Среднее</SelectItem>
-                    <SelectItem value="college">Среднее специальное</SelectItem>
                     <SelectItem value="higher">Высшее</SelectItem>
-                    <SelectItem value="postgraduate">Учёная степень</SelectItem>
+                    <SelectItem value="secondary">Среднее</SelectItem>
+                    <SelectItem value="vocational">Средне-специальное</SelectItem>
                   </SelectContent>
                 </Select>
               ) : (
                 <p className="font-medium text-[#1F1F1F]">
-                  {formData.education === 'secondary' ? 'Среднее' :
-                   formData.education === 'college' ? 'Среднее специальное' :
-                   formData.education === 'higher' ? 'Высшее' :
-                   formData.education === 'postgraduate' ? 'Учёная степень' : 'Не указано'}
+                  {formData.education === 'higher' ? 'Высшее' :
+                   formData.education === 'secondary' ? 'Среднее' :
+                   formData.education === 'vocational' ? 'Средне-специальное' : 'Не указано'}
                 </p>
               )}
             </div>
