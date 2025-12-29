@@ -10,7 +10,8 @@ const NavigationBar = () => {
   const { user } = useAuth();
   const [showFeedback, setShowFeedback] = useState(false);
   
-  const isAdmin = user?.email?.includes('admin');
+  // Check if user is admin via is_admin field or legacy email check
+  const isAdmin = user?.is_admin || user?.is_super_admin || user?.email?.toLowerCase() === 'admin@test.com';
 
   const baseNavItems = [
     { icon: Video, path: '/videochat', label: 'Видеочат', testId: 'nav-videochat', color: '#FF5757' },
