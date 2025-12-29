@@ -22,13 +22,23 @@ const Subscriptions = () => {
 
   const loadData = async () => {
     try {
-      const [plansResponse, statusResponse] = await Promise.all([
+      const [plansResponse, statusResponse, userResponse] = await Promise.all([
         api.get('/subscriptions/plans'),
-        api.get('/subscriptions/my-status')
+        api.get('/subscriptions/my-status'),
+        api.get('/auth/me')
       ]);
       
       setPlans(plansResponse.data);
       setStatus(statusResponse.data);
+      
+      // Check if user has active subscription
+      const userData = userResponse.data;
+      if (userData.active_subscription && userData.subscription_expires_at) {
+        const expiresAt = new Date(userData.subscription_expires_at);
+        if (expiresAt > new Date()) {
+          setCurrentPlan(userData.active_subscription);
+        }
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -36,14 +46,27 @@ const Subscriptions = () => {
     }
   };
 
-  const handlePurchase = async (planName, enabled) => {
+  const handlePurchaseClick = (planName, enabled) => {
     if (!enabled) {
       toast.error('Тариф временно не доступен');
       return;
     }
+    
+    // If user already has a subscription, show confirmation
+    if (currentPlan && currentPlan !== planName) {
+      setSelectedPlan(planName);
+      setShowConfirmModal(true);
+    } else {
+      handlePurchase(planName);
+    }
+  };
+
+  const handlePurchase = async (planName) => {
     try {
       const response = await api.post(`/subscriptions/purchase?plan_name=${encodeURIComponent(planName)}`);
       toast.success(response.data.message);
+      setShowConfirmModal(false);
+      setSelectedPlan(null);
       loadData(); // Reload status
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Ошибка покупки');
