@@ -192,6 +192,84 @@ const Filters = () => {
             </Select>
           </div>
 
+          {/* Premium Filters - only visible for subscribers */}
+          {hasSubscription && (
+            <div className="space-y-6 pt-4 border-t border-[#E5E5E5]">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-semibold text-[#7B61FF] bg-[#7B61FF]/10 px-2 py-1 rounded-full">
+                  ПРЕМИУМ ФИЛЬТРЫ
+                </span>
+              </div>
+              
+              <div>
+                <Label htmlFor="height">Рост</Label>
+                <Select value={formData.height_range} onValueChange={(value) => setFormData({...formData, height_range: value})}>
+                  <SelectTrigger data-testid="filter-height-select">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Неважно</SelectItem>
+                    <SelectItem value="150-160">150-160 см</SelectItem>
+                    <SelectItem value="160-170">160-170 см</SelectItem>
+                    <SelectItem value="170-180">170-180 см</SelectItem>
+                    <SelectItem value="180-190">180-190 см</SelectItem>
+                    <SelectItem value="190+">190+ см</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="weight">Вес</Label>
+                <Select value={formData.weight_range} onValueChange={(value) => setFormData({...formData, weight_range: value})}>
+                  <SelectTrigger data-testid="filter-weight-select">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Неважно</SelectItem>
+                    <SelectItem value="40-50">40-50 кг</SelectItem>
+                    <SelectItem value="50-60">50-60 кг</SelectItem>
+                    <SelectItem value="60-70">60-70 кг</SelectItem>
+                    <SelectItem value="70-80">70-80 кг</SelectItem>
+                    <SelectItem value="80-90">80-90 кг</SelectItem>
+                    <SelectItem value="90+">90+ кг</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="education">Образование</Label>
+                <Select value={formData.education_preference} onValueChange={(value) => setFormData({...formData, education_preference: value})}>
+                  <SelectTrigger data-testid="filter-education-select">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Неважно</SelectItem>
+                    <SelectItem value="secondary">Среднее</SelectItem>
+                    <SelectItem value="college">Среднее специальное</SelectItem>
+                    <SelectItem value="higher">Высшее</SelectItem>
+                    <SelectItem value="postgraduate">Учёная степень</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+
+          {!hasSubscription && (
+            <div className="bg-gradient-to-r from-[#7B61FF]/10 to-[#E056FD]/10 rounded-2xl p-4 border border-[#7B61FF]/20">
+              <p className="text-sm text-[#7A7A7A] text-center">
+                🔒 Дополнительные фильтры (рост, вес, образование) доступны с подпиской
+              </p>
+              <Button
+                type="button"
+                onClick={() => navigate('/subscriptions')}
+                variant="outline"
+                className="w-full mt-3 border-[#7B61FF] text-[#7B61FF] hover:bg-[#7B61FF]/10"
+              >
+                Посмотреть тарифы
+              </Button>
+            </div>
+          )}
+
           <Button
             type="submit"
             disabled={loading}
