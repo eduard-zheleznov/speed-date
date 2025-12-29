@@ -169,7 +169,7 @@ const Subscriptions = () => {
                     )}
 
                     <Button
-                      onClick={() => handlePurchase(plan.name, isEnabled)}
+                      onClick={() => handlePurchaseClick(plan.name, isEnabled)}
                       disabled={!isEnabled}
                       className={`w-full py-6 rounded-full text-white font-semibold text-lg ${
                         !isEnabled ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'
@@ -177,7 +177,7 @@ const Subscriptions = () => {
                       style={{ backgroundColor: isEnabled ? color : '#9CA3AF' }}
                       data-testid={`purchase-${plan.name}-button`}
                     >
-                      {isEnabled ? 'ОПЛАТИТЬ' : 'НЕ ДОСТУПЕН'}
+                      {currentPlan === plan.name ? 'ТЕКУЩИЙ ПЛАН' : isEnabled ? 'ОПЛАТИТЬ' : 'НЕ ДОСТУПЕН'}
                     </Button>
                   </div>
                 );
@@ -185,11 +185,54 @@ const Subscriptions = () => {
             </div>
 
             <p className="text-center text-[#7A7A7A] text-sm mt-8">
-              * Оплата через ЮKassa
+              * Оплата через ЮKassa. Видео общение ограничено 10 минутами для всех тарифов.
             </p>
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal for Plan Change */}
+      <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-center flex items-center justify-center gap-2" style={{ color: '#1F1F1F' }}>
+              <AlertTriangle className="w-6 h-6 text-[#FFA726]" />
+              Смена тарифа
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-6">
+            <div className="bg-[#FFF8E1] border border-[#FFE082] rounded-xl p-4 mb-4">
+              <p className="text-center text-[#1F1F1F]">
+                План будет переключен на новый, прошлый план полностью обнулится. Деньги не возвращаются.
+              </p>
+            </div>
+            <p className="text-center text-[#7A7A7A] text-sm">
+              Текущий план: <span className="font-semibold text-[#1F1F1F]">{currentPlan}</span>
+              <br />
+              Новый план: <span className="font-semibold text-[#1A73E8]">{selectedPlan}</span>
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => {
+                setShowConfirmModal(false);
+                setSelectedPlan(null);
+              }}
+              variant="outline"
+              className="flex-1"
+            >
+              Отмена
+            </Button>
+            <Button
+              onClick={() => handlePurchase(selectedPlan)}
+              className="flex-1"
+              style={{ background: 'linear-gradient(135deg, #FF5757 0%, #FF8E8E 100%)' }}
+            >
+              Подтвердить
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
