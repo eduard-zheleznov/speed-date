@@ -127,7 +127,7 @@ const Subscriptions = () => {
                       </li>
                       <li className="flex items-center gap-2 text-[#1F1F1F]">
                         <Check className="w-5 h-5 text-[#34C759]" />
-                        <span>Без ограничений времени</span>
+                        <span>Найти свою пару быстрее</span>
                       </li>
                       <li className="flex items-center gap-2 text-[#1F1F1F]">
                         <Check className="w-5 h-5 text-[#34C759]" />
