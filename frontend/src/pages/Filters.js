@@ -244,10 +244,9 @@ const Filters = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="any">Неважно</SelectItem>
-                    <SelectItem value="secondary">Среднее</SelectItem>
-                    <SelectItem value="college">Среднее специальное</SelectItem>
                     <SelectItem value="higher">Высшее</SelectItem>
-                    <SelectItem value="postgraduate">Учёная степень</SelectItem>
+                    <SelectItem value="secondary">Среднее</SelectItem>
+                    <SelectItem value="vocational">Средне-специальное</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
