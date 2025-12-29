@@ -257,16 +257,8 @@ const Filters = () => {
           {!hasSubscription && (
             <div className="bg-gradient-to-r from-[#7B61FF]/10 to-[#E056FD]/10 rounded-2xl p-4 border border-[#7B61FF]/20">
               <p className="text-sm text-[#7A7A7A] text-center">
-                🔒 Дополнительные фильтры (рост, вес, образование) доступны с подпиской
+                🔒 Доп. фильтры (рост, вес, образование) доступны с подпиской
               </p>
-              <Button
-                type="button"
-                onClick={() => navigate('/subscriptions')}
-                variant="outline"
-                className="w-full mt-3 border-[#7B61FF] text-[#7B61FF] hover:bg-[#7B61FF]/10"
-              >
-                Посмотреть тарифы
-              </Button>
             </div>
           )}
 

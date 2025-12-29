@@ -185,7 +185,7 @@ const Subscriptions = () => {
             </div>
 
             <p className="text-center text-[#7A7A7A] text-sm mt-8">
-              * Оплата через ЮKassa. Видео общение ограничено 10 минутами для всех тарифов.
+              * Оплата через ЮKassa
             </p>
           </div>
         </div>
