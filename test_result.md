@@ -363,34 +363,39 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      Implemented user requested features:
+      Implemented all 6 user requested changes:
       
-      1. ADMIN PROTECTION:
-         - Super admin (admin@test.com) cannot be blocked or deleted
-         - Instead shows "Супер" badge and "Пароль" button for password change
-         - Backend validates and rejects attempts to block/delete super admin
+      1. TEXT CHANGES:
+         - Landing: "Удобный интерфейс" → "Живое общение с реальными людьми" (moved before "Мгновенные совпадения")
+         - Subscriptions: "Без ограничений времени" → "Найти свою пару быстрее"
       
-      2. ADMIN ROLE MANAGEMENT:
-         - Super admin can assign other users as admins
-         - Can select specific permissions (users, subscriptions, tariffs, complaints, feedback, stats)
-         - Added new API endpoints: PUT /admin/user/{id}/admin-role, POST /admin/user/change-password
+      2. ADMIN ROLE FIX:
+         - NavigationBar now checks user.is_admin and user.is_super_admin fields
+         - AuthContext fetches latest user data after login to get admin fields
+         - Assigned admins now see "Админ" section in navigation
       
-      3. FIXED NAVIGATION:
-         - NavigationBar already has sticky top-0 z-50
-         - Updated Matches.js page structure for proper scrolling behavior
-         - Content scrolls while navigation stays fixed
+      3. FAVICON:
+         - Created heart SVG favicon with gradient (red to purple)
+         - Updated index.html with favicon link
       
-      4. DAILY COMMUNICATIONS RESET:
-         - 5 FREE communications per day for everyone
-         - After midnight (00:00 UTC), counter resets to 5 free + premium
-         - Premium users get additional communications based on plan
-         - Logic implemented in subscriptions_router.py
+      4. PREMIUM FILTERS:
+         - Added height, weight, education filters (visible only for subscribers)
+         - Non-subscribers see "🔒 Дополнительные фильтры доступны с подпиской" message
+         - Added "Образование" field to Profile.js
+      
+      5. SUBSCRIPTION PLAN CHANGE CONFIRMATION:
+         - Modal shows when user tries to buy different plan
+         - Text: "План будет переключен на новый, прошлый план полностью обнулится. Деньги не возвращаются."
+         - Shows current and new plan names
+         - Only one plan can be active at a time
+      
+      6. VIDEO CHAT TIME LIMIT:
+         - Added note: "Видео общение ограничено 10 минутами для всех тарифов"
       
       Testing needed:
-      - Admin protection (try to block/delete admin@test.com)
-      - Admin role assignment
-      - Password change for admin
-      - Navigation scrolling on pages with lots of content
+      - Admin role assignment and visibility
+      - Premium filters visibility based on subscription
+      - Plan change confirmation modal
   - agent: "testing"
     message: |
       BACKEND TESTING COMPLETED - Critical bug fixes verified:
