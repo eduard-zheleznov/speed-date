@@ -58,7 +58,10 @@ const AdminDashboard = () => {
   const isProtectedAdmin = (userEmail) => userEmail?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase();
 
   useEffect(() => {
-    if (!user?.email?.includes('admin')) {
+    // Check if user has admin access (via is_admin flag or legacy email check)
+    const hasAdminAccess = user?.is_admin || user?.is_super_admin || user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase();
+    
+    if (!hasAdminAccess) {
       toast.error('Доступ запрещен');
       navigate('/videochat');
       return;
