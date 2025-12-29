@@ -311,6 +311,30 @@ const Profile = () => {
               </div>
             </div>
 
+            <div className="p-4 bg-white rounded-xl border-2 border-[#D0D5DD] hover:border-[#1A73E8] transition-all shadow-sm">
+              <Label className="text-xs text-[#5A5A5A] mb-1 block font-medium">Образование</Label>
+              {editing ? (
+                <Select value={formData.education || ''} onValueChange={(value) => setFormData({...formData, education: value})}>
+                  <SelectTrigger className="border-0 p-0 h-auto focus:ring-0 font-medium text-[#1F1F1F]">
+                    <SelectValue placeholder="Выберите..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="secondary">Среднее</SelectItem>
+                    <SelectItem value="college">Среднее специальное</SelectItem>
+                    <SelectItem value="higher">Высшее</SelectItem>
+                    <SelectItem value="postgraduate">Учёная степень</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <p className="font-medium text-[#1F1F1F]">
+                  {formData.education === 'secondary' ? 'Среднее' :
+                   formData.education === 'college' ? 'Среднее специальное' :
+                   formData.education === 'higher' ? 'Высшее' :
+                   formData.education === 'postgraduate' ? 'Учёная степень' : 'Не указано'}
+                </p>
+              )}
+            </div>
+
             <div className="p-4 bg-white rounded-xl border-2 border-[#D0D5DD] hover:border-[#1A73E8] transition-all shadow-sm relative">
               <Label className="text-xs text-[#5A5A5A] mb-1 block font-medium">Ближайший город</Label>
               {editing ? (
