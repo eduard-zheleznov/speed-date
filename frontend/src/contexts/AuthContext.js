@@ -45,6 +45,15 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     
+    // Fetch latest user data (including admin fields) after login
+    try {
+      const meResponse = await api.get('/auth/me');
+      localStorage.setItem('user', JSON.stringify(meResponse.data));
+      setUser(meResponse.data);
+    } catch (error) {
+      console.log('Could not refresh user data');
+    }
+    
     return userData;
   };
 
