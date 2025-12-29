@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import NavigationBar from '../components/NavigationBar';
 import { Button } from '../components/ui/button';
-import { Check } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import { Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../lib/api';
 
@@ -11,6 +12,9 @@ const Subscriptions = () => {
   const [plans, setPlans] = useState([]);
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentPlan, setCurrentPlan] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
 
   useEffect(() => {
     loadData();
