@@ -64,21 +64,30 @@ def is_protected_admin(user_email: str) -> bool:
     """Check if user is the protected super admin"""
     return user_email.lower() == SUPER_ADMIN_EMAIL.lower()
 
-@router.get("/users", response_model=List[User])
+@router.get("/users")
 async def get_all_users(admin_id: str = Depends(is_admin)):
-    users = await users_collection.find({}, {"_id": 0}).to_list(1000)
+    """Get all users with minimal data for admin list"""
+    # Only fetch fields needed for admin table
+    projection = {
+        "_id": 0,
+        "id": 1,
+        "email": 1,
+        "name": 1,
+        "age": 1,
+        "city": 1,
+        "blocked": 1,
+        "complaint_count": 1,
+        "created_at": 1,
+        "last_login": 1,
+        "active_subscription": 1,
+        "subscription_expires_at": 1,
+        "is_admin": 1,
+        "is_super_admin": 1,
+        "admin_permissions": 1
+    }
     
-    for user in users:
-        if isinstance(user.get("created_at"), str):
-            user["created_at"] = datetime.fromisoformat(user["created_at"])
-        if isinstance(user.get("last_login"), str):
-            user["last_login"] = datetime.fromisoformat(user["last_login"])
-        if isinstance(user.get("subscription_activated_at"), str):
-            user["subscription_activated_at"] = datetime.fromisoformat(user["subscription_activated_at"])
-        if isinstance(user.get("subscription_expires_at"), str):
-            user["subscription_expires_at"] = datetime.fromisoformat(user["subscription_expires_at"])
-    
-    return [User(**user) for user in users]
+    users = await users_collection.find({}, projection).to_list(1000)
+    return users
 
 @router.get("/user/{user_id}", response_model=User)
 async def get_user_details(user_id: str, admin_id: str = Depends(is_admin)):
