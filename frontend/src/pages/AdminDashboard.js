@@ -89,28 +89,20 @@ const AdminDashboard = () => {
 
   const loadData = async () => {
     try {
-      const [statsRes, usersRes, complaintsRes, plansRes, activeSubsRes] = await Promise.all([
-        api.get('/admin/stats'),
-        api.get('/admin/users'),
-        api.get('/admin/complaints'),
-        api.get('/subscriptions/plans'),
-        api.get('/admin/subscription/active-users')
-      ]);
-      
+      // Always load stats (it's fast)
+      const statsRes = await api.get('/admin/stats');
       setStats(statsRes.data);
-      setUsers(usersRes.data);
-      setComplaints(complaintsRes.data);
-      setPlanSettings(plansRes.data.map(p => ({ ...p, enabled: p.enabled !== false })));
-      setSubscriptionUsers(activeSubsRes.data);
       
-      // Try to load feedbacks
-      try {
-        const feedbackRes = await api.get('/admin/feedbacks');
-        setFeedbacks(feedbackRes.data || []);
-      } catch {
-        setFeedbacks([]);
-      }
+      // Load other data in background without blocking
+      Promise.all([
+        api.get('/admin/users').then(res => setUsers(res.data)).catch(() => setUsers([])),
+        api.get('/admin/complaints').then(res => setComplaints(res.data)).catch(() => setComplaints([])),
+        api.get('/subscriptions/plans').then(res => setPlanSettings(res.data.map(p => ({ ...p, enabled: p.enabled !== false })))).catch(() => {}),
+        api.get('/admin/subscription/active-users').then(res => setSubscriptionUsers(res.data)).catch(() => setSubscriptionUsers([])),
+        api.get('/admin/feedbacks').then(res => setFeedbacks(res.data || [])).catch(() => setFeedbacks([]))
+      ]);
     } catch (error) {
+      console.error('Error loading admin data:', error);
       toast.error('Ошибка загрузки данных');
     } finally {
       setLoading(false);
