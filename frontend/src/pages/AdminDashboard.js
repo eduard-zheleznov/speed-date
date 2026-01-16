@@ -72,6 +72,18 @@ const AdminDashboard = () => {
       navigate('/videochat');
       return;
     }
+    
+    // Set initial tab to first available permission
+    const userPerms = (user?.is_super_admin || user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase()) 
+      ? ALL_PERMISSIONS 
+      : (user?.admin_permissions || []);
+    
+    const tabOrder = ['stats', 'users', 'subscriptions', 'tariffs', 'complaints', 'feedback'];
+    const firstAvailable = tabOrder.find(t => userPerms.includes(t));
+    if (firstAvailable && !userPerms.includes(activeTab)) {
+      setActiveTab(firstAvailable);
+    }
+    
     loadData();
   }, [user, navigate]);
 
