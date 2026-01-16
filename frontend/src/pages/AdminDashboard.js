@@ -54,8 +54,14 @@ const AdminDashboard = () => {
   const SUPER_ADMIN_EMAIL = 'admin@test.com';
   const ALL_PERMISSIONS = ['users', 'subscriptions', 'tariffs', 'complaints', 'feedback', 'stats'];
   
-  const isSuperAdmin = user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase();
+  const isSuperAdmin = user?.is_super_admin || user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase();
   const isProtectedAdmin = (userEmail) => userEmail?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase();
+  
+  // Get user's admin permissions (super admin has all permissions)
+  const userPermissions = isSuperAdmin ? ALL_PERMISSIONS : (user?.admin_permissions || []);
+  
+  // Check if user has specific permission
+  const hasPermission = (permission) => isSuperAdmin || userPermissions.includes(permission);
 
   useEffect(() => {
     // Check if user has admin access (via is_admin flag or legacy email check)
