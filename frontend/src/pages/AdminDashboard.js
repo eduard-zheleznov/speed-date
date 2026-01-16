@@ -316,13 +316,13 @@ const AdminDashboard = () => {
         {/* Tabs */}
         <div className="flex gap-2 mb-6 border-b border-[#E5E5E5] overflow-x-auto">
           {[
-            { id: 'stats', label: 'Статистика', icon: Activity },
-            { id: 'users', label: 'Пользователи', icon: Users },
-            { id: 'subscriptions', label: 'Подписки', icon: CreditCard },
-            { id: 'tariffs', label: 'Тарифы', icon: CreditCard },
-            { id: 'complaints', label: 'Жалобы', icon: AlertTriangle },
-            { id: 'feedback', label: 'Обратная связь', icon: MessageCircle }
-          ].map(tab => {
+            { id: 'stats', label: 'Статистика', icon: Activity, permission: 'stats' },
+            { id: 'users', label: 'Пользователи', icon: Users, permission: 'users' },
+            { id: 'subscriptions', label: 'Подписки', icon: CreditCard, permission: 'subscriptions' },
+            { id: 'tariffs', label: 'Тарифы', icon: CreditCard, permission: 'tariffs' },
+            { id: 'complaints', label: 'Жалобы', icon: AlertTriangle, permission: 'complaints' },
+            { id: 'feedback', label: 'Обратная связь', icon: MessageCircle, permission: 'feedback' }
+          ].filter(tab => hasPermission(tab.permission)).map(tab => {
             const Icon = tab.icon;
             return (
               <button
