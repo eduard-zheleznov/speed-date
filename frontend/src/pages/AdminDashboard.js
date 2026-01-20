@@ -910,13 +910,97 @@ const AdminDashboard = () => {
             </DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <div className="border rounded-lg overflow-hidden" style={{ minHeight: '400px' }}>
-              <ReactQuill
-                theme="snow"
-                value={docContent}
-                onChange={setDocContent}
-                modules={quillModules}
-                style={{ height: '350px' }}
+            {/* Toolbar */}
+            <div className="flex gap-1 mb-2 p-2 bg-[#F6F7F9] rounded-lg flex-wrap">
+              <button
+                type="button"
+                onClick={() => insertTag('h2')}
+                className="px-3 py-1 text-sm bg-white border rounded hover:bg-gray-50"
+                title="Заголовок"
+              >
+                H2
+              </button>
+              <button
+                type="button"
+                onClick={() => insertTag('h3')}
+                className="px-3 py-1 text-sm bg-white border rounded hover:bg-gray-50"
+                title="Подзаголовок"
+              >
+                H3
+              </button>
+              <button
+                type="button"
+                onClick={() => insertTag('strong')}
+                className="p-1 bg-white border rounded hover:bg-gray-50"
+                title="Жирный"
+              >
+                <Bold className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => insertTag('em')}
+                className="p-1 bg-white border rounded hover:bg-gray-50"
+                title="Курсив"
+              >
+                <Italic className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => insertTag('ul')}
+                className="p-1 bg-white border rounded hover:bg-gray-50"
+                title="Список"
+              >
+                <List className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => insertTag('p')}
+                className="p-1 bg-white border rounded hover:bg-gray-50"
+                title="Параграф"
+              >
+                <AlignLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => insertTag('p', ' style="text-align: center;"')}
+                className="p-1 bg-white border rounded hover:bg-gray-50"
+                title="По центру"
+              >
+                <AlignCenter className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => insertTag('a')}
+                className="p-1 bg-white border rounded hover:bg-gray-50"
+                title="Ссылка"
+              >
+                <LinkIcon className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setDocContent(docContent + '<hr>')}
+                className="px-3 py-1 text-sm bg-white border rounded hover:bg-gray-50"
+                title="Разделитель"
+              >
+                —
+              </button>
+            </div>
+            
+            {/* Editor */}
+            <textarea
+              id="doc-editor"
+              value={docContent}
+              onChange={(e) => setDocContent(e.target.value)}
+              className="w-full h-64 p-4 border rounded-lg font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1A73E8]"
+              placeholder="Введите HTML-контент документа..."
+            />
+            
+            {/* Preview */}
+            <div className="mt-4">
+              <p className="text-sm text-[#7A7A7A] mb-2">Предпросмотр:</p>
+              <div 
+                className="border rounded-lg p-4 bg-white max-h-48 overflow-y-auto prose prose-sm"
+                dangerouslySetInnerHTML={{ __html: docContent }}
               />
             </div>
           </div>
