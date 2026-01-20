@@ -104,8 +104,11 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="App">
-          <AppRoutes />
+        <div className="App min-h-screen flex flex-col">
+          <div className="flex-1">
+            <AppRoutes />
+          </div>
+          <Footer />
           <Toaster position="top-center" richColors />
         </div>
       </BrowserRouter>
