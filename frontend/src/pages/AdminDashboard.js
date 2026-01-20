@@ -853,7 +853,81 @@ const AdminDashboard = () => {
             )}
           </div>
         )}
+
+        {/* Documents Tab (Super Admin Only) */}
+        {activeTab === 'documents' && isSuperAdmin && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl p-6 shadow-sm">
+              <h3 className="font-semibold text-[#1F1F1F] mb-2 flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Реквизиты
+              </h3>
+              <p className="text-sm text-[#7A7A7A] mb-4">Отображается в футере сайта при клике на "Реквизиты"</p>
+              <Button
+                onClick={() => openDocEditor('requisites')}
+                className="w-full"
+                style={{ background: 'linear-gradient(135deg, #1A73E8 0%, #6A9EFF 100%)' }}
+              >
+                Редактировать реквизиты
+              </Button>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-sm">
+              <h3 className="font-semibold text-[#1F1F1F] mb-2 flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Пользовательское соглашение
+              </h3>
+              <p className="text-sm text-[#7A7A7A] mb-4">Отображается в футере сайта при клике на "Пользовательское соглашение"</p>
+              <Button
+                onClick={() => openDocEditor('agreement')}
+                className="w-full"
+                style={{ background: 'linear-gradient(135deg, #7B61FF 0%, #E056FD 100%)' }}
+              >
+                Редактировать соглашение
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Document Editor Modal */}
+      <Dialog open={!!editingDoc} onOpenChange={() => setEditingDoc(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold" style={{ color: '#1F1F1F' }}>
+              {editingDoc === 'requisites' ? 'Редактирование реквизитов' : 'Редактирование пользовательского соглашения'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="border rounded-lg overflow-hidden" style={{ minHeight: '400px' }}>
+              <ReactQuill
+                theme="snow"
+                value={docContent}
+                onChange={setDocContent}
+                modules={quillModules}
+                style={{ height: '350px' }}
+              />
+            </div>
+          </div>
+          <div className="flex gap-3 mt-4">
+            <Button
+              onClick={() => setEditingDoc(null)}
+              variant="outline"
+              className="flex-1"
+            >
+              Отмена
+            </Button>
+            <Button
+              onClick={() => saveDocument(editingDoc)}
+              disabled={savingDoc}
+              className="flex-1"
+              style={{ background: 'linear-gradient(135deg, #1A73E8 0%, #6A9EFF 100%)' }}
+            >
+              {savingDoc ? 'Сохранение...' : 'Сохранить'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Modal */}
       <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
