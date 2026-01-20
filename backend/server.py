@@ -53,6 +53,7 @@ api_router.include_router(subscriptions_router)
 api_router.include_router(admin_router)
 api_router.include_router(testing_router)
 api_router.include_router(feedback_router)
+api_router.include_router(documents_router)
 
 app.include_router(api_router)
 
