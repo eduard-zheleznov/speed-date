@@ -31,6 +31,7 @@ from routers.subscriptions_router import router as subscriptions_router
 from routers.admin_router import router as admin_router
 from routers.testing_router import router as testing_router
 from routers.feedback_router import router as feedback_router
+from routers.documents_router import router as documents_router
 from database import close_db
 
 # Create API router with prefix
