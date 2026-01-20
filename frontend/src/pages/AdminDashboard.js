@@ -5,13 +5,15 @@ import NavigationBar from '../components/NavigationBar';
 import { 
   Users, AlertTriangle, Activity, MessageSquare, Ban, Trash2, 
   CreditCard, ArrowUpDown, Search, ChevronDown, ChevronUp, History, MessageCircle, 
-  Key, Shield, UserCog
+  Key, Shield, UserCog, FileText
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { toast } from 'sonner';
 import api from '../lib/api';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -24,6 +26,12 @@ const AdminDashboard = () => {
   const [planSettings, setPlanSettings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('stats');
+  
+  // Documents state
+  const [documents, setDocuments] = useState({ requisites: '', agreement: '' });
+  const [editingDoc, setEditingDoc] = useState(null);
+  const [docContent, setDocContent] = useState('');
+  const [savingDoc, setSavingDoc] = useState(false);
   
   // Sorting state
   const [sortField, setSortField] = useState('created_at');
