@@ -151,16 +151,29 @@ const AdminDashboard = () => {
     setEditingDoc(docId);
   };
 
-  // Quill editor modules
-  const quillModules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'align': [] }],
-      ['link'],
-      ['clean']
-    ]
+  // Simple HTML formatting helpers
+  const insertTag = (tag, attr = '') => {
+    const textarea = document.getElementById('doc-editor');
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = docContent.substring(start, end);
+    
+    let newText;
+    if (tag === 'a') {
+      const url = prompt('Введите URL:');
+      if (!url) return;
+      newText = `<a href="${url}">${selected || 'Ссылка'}</a>`;
+    } else if (tag === 'ul') {
+      newText = `<ul>\n<li>${selected || 'Пункт'}</li>\n</ul>`;
+    } else {
+      newText = `<${tag}${attr}>${selected}</${tag}>`;
+    }
+    
+    const before = docContent.substring(0, start);
+    const after = docContent.substring(end);
+    setDocContent(before + newText + after);
   };
 
   const handleBlockUser = async (userId, blocked) => {
