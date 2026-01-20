@@ -381,8 +381,9 @@ const AdminDashboard = () => {
             { id: 'subscriptions', label: 'Подписки', icon: CreditCard, permission: 'subscriptions' },
             { id: 'tariffs', label: 'Тарифы', icon: CreditCard, permission: 'tariffs' },
             { id: 'complaints', label: 'Жалобы', icon: AlertTriangle, permission: 'complaints' },
-            { id: 'feedback', label: 'Обратная связь', icon: MessageCircle, permission: 'feedback' }
-          ].filter(tab => hasPermission(tab.permission)).map(tab => {
+            { id: 'feedback', label: 'Обратная связь', icon: MessageCircle, permission: 'feedback' },
+            ...(isSuperAdmin ? [{ id: 'documents', label: 'Документы', icon: FileText, permission: 'documents' }] : [])
+          ].filter(tab => tab.permission === 'documents' ? isSuperAdmin : hasPermission(tab.permission)).map(tab => {
             const Icon = tab.icon;
             return (
               <button
