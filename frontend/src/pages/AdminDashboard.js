@@ -107,7 +107,9 @@ const AdminDashboard = () => {
         api.get('/admin/complaints').then(res => setComplaints(res.data)).catch(() => setComplaints([])),
         api.get('/subscriptions/plans').then(res => setPlanSettings(res.data.map(p => ({ ...p, enabled: p.enabled !== false })))).catch(() => {}),
         api.get('/admin/subscription/active-users').then(res => setSubscriptionUsers(res.data)).catch(() => setSubscriptionUsers([])),
-        api.get('/admin/feedbacks').then(res => setFeedbacks(res.data || [])).catch(() => setFeedbacks([]))
+        api.get('/admin/feedbacks').then(res => setFeedbacks(res.data || [])).catch(() => setFeedbacks([])),
+        // Load documents for super admin
+        loadDocuments()
       ]);
     } catch (error) {
       console.error('Error loading admin data:', error);
@@ -115,6 +117,52 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadDocuments = async () => {
+    try {
+      const [reqRes, agrRes] = await Promise.all([
+        api.get('/documents/requisites'),
+        api.get('/documents/agreement')
+      ]);
+      setDocuments({
+        requisites: reqRes.data.content,
+        agreement: agrRes.data.content
+      });
+    } catch (error) {
+      console.error('Error loading documents:', error);
+    }
+  };
+
+  const saveDocument = async (docId) => {
+    setSavingDoc(true);
+    try {
+      await api.put(`/documents/${docId}`, { content: docContent });
+      setDocuments(prev => ({ ...prev, [docId]: docContent }));
+      toast.success('Документ сохранён');
+      setEditingDoc(null);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Ошибка сохранения');
+    } finally {
+      setSavingDoc(false);
+    }
+  };
+
+  const openDocEditor = (docId) => {
+    setDocContent(documents[docId] || '');
+    setEditingDoc(docId);
+  };
+
+  // Quill editor modules
+  const quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'align': [] }],
+      ['link'],
+      ['clean']
+    ]
   };
 
   const handleBlockUser = async (userId, blocked) => {
