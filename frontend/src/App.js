@@ -11,6 +11,7 @@ import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import Subscriptions from './pages/Subscriptions';
 import AdminDashboard from './pages/AdminDashboard';
+import Footer from './components/Footer';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
