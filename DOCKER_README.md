@@ -1,99 +1,95 @@
 # Speed Date - Сервис видео-знакомств
 
-## Быстрый старт с Docker
+## Деплой на Timeweb Cloud App Platform
 
 ### Требования
-- Docker 20.10+
-- Docker Compose 2.0+
-- 2GB RAM минимум
-- 10GB свободного места
+- Аккаунт на [Timeweb Cloud](https://timeweb.cloud)
+- Git-репозиторий с кодом (GitHub, GitLab, BitBucket или по URL)
 
-### Установка
-
-1. **Клонируйте репозиторий:**
-```bash
-git clone <repository-url>
-cd speed-date
+### Структура файлов (в корне репозитория)
+```
+/
+├── docker-compose.yml      # Конфигурация Docker Compose
+├── Dockerfile.backend      # Сборка backend (FastAPI)
+├── Dockerfile.frontend     # Сборка frontend (React + Nginx)
+├── nginx.conf              # Конфигурация Nginx
+├── .env.example            # Пример переменных окружения
+├── backend/                # Код backend
+└── frontend/               # Код frontend
 ```
 
-2. **Создайте файл окружения:**
+### Шаги деплоя на Timeweb Cloud
+
+1. **Создайте файл .env в репозитории:**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Заполните обязательные переменные в .env:**
+   - `JWT_SECRET` - секретный ключ (сгенерируйте: `openssl rand -hex 32`)
+   - `REACT_APP_BACKEND_URL` - URL вашего приложения
+   - `SMTP_*` - настройки почты
+
+3. **В панели Timeweb Cloud:**
+   - Перейдите в App Platform
+   - Выберите "Docker" → "Docker Compose"
+   - Подключите репозиторий
+   - Выберите ветку и коммит
+   - Выберите конфигурацию сервера (минимум 2 CPU, 4 GB RAM)
+   - Добавьте переменные из .env в настройках
+   - Нажмите "Запустить деплой"
+
+### Сервисы
+
+| Сервис | Порт | Описание |
+|--------|------|----------|
+| frontend | 3000 | React + Nginx (основной домен) |
+| backend | 8001 | FastAPI API |
+| mongodb | 27017 | База данных |
+
+**Важно:** Frontend - первый сервис в docker-compose.yml, поэтому он получает проксирование на основной домен.
+
+### Доступ после деплоя
+
+- **Основной сайт:** https://ваш-домен.timeweb.cloud
+- **API:** https://ваш-домен.timeweb.cloud/api/
+- **Backend напрямую:** https://ваш-домен.timeweb.cloud:8001/api/
+
+### Локальная разработка
+
 ```bash
+# 1. Создайте .env
 cp .env.example .env
-```
 
-3. **Отредактируйте .env файл:**
-```bash
+# 2. Отредактируйте настройки
 nano .env
-```
 
-Обязательные настройки:
-- `JWT_SECRET` - секретный ключ для токенов (сгенерируйте случайную строку)
-- `REACT_APP_BACKEND_URL` - URL вашего домена (например, https://speed-date.ru)
-- `SMTP_*` - настройки почты для регистрации
-
-4. **Запустите приложение:**
-```bash
+# 3. Запустите
 docker-compose up -d
+
+# 4. Откройте в браузере
+# Frontend: http://localhost:3000
+# API: http://localhost:8001/api/
 ```
-
-5. **Проверьте статус:**
-```bash
-docker-compose ps
-```
-
-### Доступ
-
-- **Frontend:** http://localhost (или ваш домен)
-- **Backend API:** http://localhost/api/
-- **MongoDB:** localhost:27017
 
 ### Управление
 
 ```bash
-# Остановить все сервисы
+# Остановить
 docker-compose down
 
-# Перезапустить
-docker-compose restart
-
-# Посмотреть логи
+# Логи
 docker-compose logs -f
 
 # Логи конкретного сервиса
 docker-compose logs -f backend
-docker-compose logs -f frontend
 
-# Пересобрать после изменений
+# Пересобрать
 docker-compose up -d --build
+
+# Статус
+docker-compose ps
 ```
-
-### Структура проекта
-
-```
-/
-├── docker-compose.yml      # Конфигурация Docker
-├── Dockerfile.backend      # Сборка backend
-├── Dockerfile.frontend     # Сборка frontend
-├── nginx.conf              # Конфигурация Nginx
-├── .env.example            # Пример переменных окружения
-├── backend/                # FastAPI backend
-│   ├── server.py
-│   ├── routers/
-│   ├── models.py
-│   └── requirements.txt
-└── frontend/               # React frontend
-    ├── src/
-    ├── public/
-    └── package.json
-```
-
-### Продакшен на Yandex Cloud
-
-1. Создайте VM с Ubuntu 22.04
-2. Установите Docker и Docker Compose
-3. Настройте домен (A-запись на IP сервера)
-4. Добавьте SSL с Let's Encrypt (certbot)
-5. Обновите `REACT_APP_BACKEND_URL` в .env
 
 ### Тестовые аккаунты
 
@@ -103,9 +99,18 @@ docker-compose up -d --build
 | Пользователь | bob@test.com | test123 |
 | Пользователь | alice@test.com | test123 |
 
-### Поддержка
+### Ограничения Timeweb Cloud
 
-При возникновении проблем проверьте:
-1. `docker-compose logs` для ошибок
-2. Доступность MongoDB: `docker exec speeddate-mongodb mongosh`
-3. Статус backend: `curl http://localhost:8001/api/`
+Согласно [документации](https://timeweb.cloud/docs/apps/deploying-with-docker-compose):
+
+- ❌ Нельзя использовать порты 80 и 443 как хост-порты
+- ❌ Нельзя использовать директиву `volumes`
+- ❌ Нельзя использовать `privileged`, `devices`, `cap_add` и др.
+- ✅ Первый сервис получает проксирование на основной домен
+
+### Устранение проблем
+
+1. **Ошибка сборки:** Проверьте логи в панели Timeweb Cloud
+2. **502 Bad Gateway:** Подождите 1-2 минуты, сервисы запускаются
+3. **Нет доступа к API:** Проверьте `REACT_APP_BACKEND_URL`
+4. **Проблемы с MongoDB:** Проверьте healthcheck в логах
