@@ -21,6 +21,9 @@ RUN yarn build
 # Production stage with nginx
 FROM nginx:alpine
 
+# Install wget for healthcheck
+RUN apk add --no-cache wget
+
 # Copy built files
 COPY --from=build /app/build /usr/share/nginx/html
 
