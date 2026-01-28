@@ -3,13 +3,10 @@ FROM node:18-alpine AS build
 
 WORKDIR /app
 
-# Copy package.json (yarn.lock will be generated if not present)
+# Copy package.json
 COPY frontend/package.json ./package.json
 
-# Copy yarn.lock if it exists (optional)
-COPY frontend/yarn.loc[k] ./
-
-# Install dependencies
+# Install dependencies (yarn.lock will be in frontend/ directory copied later)
 RUN yarn install
 
 # Copy frontend code
