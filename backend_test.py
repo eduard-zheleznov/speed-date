@@ -7,7 +7,7 @@ from datetime import datetime
 from PIL import Image
 
 class VideoDateAPITester:
-    def __init__(self, base_url="https://datemeet-7.preview.emergentagent.com"):
+    def __init__(self, base_url="https://datestream-5.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.admin_token = None

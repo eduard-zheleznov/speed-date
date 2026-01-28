@@ -1,188 +1,189 @@
-<analysis>
-**original_problem_statement:**
+<analysis>**original_problem_statement:**
 The user wants to build a video dating web application.
 
 **PRODUCT REQUIREMENTS:**
 -   **Core Feature:** WebRTC-based video chat between matched users.
 -   **User System:** Registration (with email confirmation), login, password recovery.
--   **Profiles:** Users can fill out a detailed profile (name, age, photos, interests, etc.), upload multiple photos, and set a main avatar. A key change is that the City field should be a searchable dropdown of Russian cities, not free text.
--   **Matching:** Users can filter potential matches by criteria (age, city, gender, etc.).
+-   **Profiles:** Users can fill out a detailed profile (name, age, photos, interests, etc.), upload multiple photos, and set a main avatar. The City field should be a searchable dropdown of Russian cities.
+-   **Matching:** Users can filter potential matches by criteria (age, city, gender, etc.). Premium filters (height, weight, education) should be available only to subscribers.
 -   **Communication Flow:**
-    1.  A 10-minute time-limited video chat.
+    1.  A 10-minute time-limited video chat for all users.
     2.  After the timer, a modal asks if users want to continue communicating.
-    3.  If both agree, a text chat is created between them, which lasts for 30 days.
-    4.  The chat UI must have fixed headers for easy navigation and show user avatars. Unread message notifications are required.
+    3.  If both agree, a text chat is created between them, lasting for 30 days.
+    4.  The chat UI must have fixed headers and show user avatars and unread message notifications.
 -   **Admin Panel:**
-    -   View/delete users, view complaints.
-    -   View users with active subscriptions, including subscription start/end dates and payment history.
-    -   Manually activate a specific subscription plan (e.g., Silver) for a user for one month.
-    -   Enable or disable entire subscription plans from being purchased.
-    -   View user feedback submissions.
--   **Subscriptions:** A tiered subscription model (Серебро, Золото, VIP) that grants a certain number of additional video chats *per day*. Payments to be handled by ЮKassa (YooKassa).
--   **Feedback System:** A mechanism for users to submit feedback (ideas, bugs, etc.) through a modal.
+    -   A super-admin () who cannot be deleted or blocked.
+    -   Ability for the super-admin to appoint other users as administrators with role-based access to specific panel sections (e.g., Users, Subscriptions, Feedback).
+    -   View/delete/block users.
+    -   View users with active subscriptions, including subscription start/end dates.
+    -   Manually activate a subscription plan for a user.
+    -   Enable or disable entire subscription plans.
+    -   View user feedback and complaints.
+    -   A Documents section for the super-admin to edit site-wide texts like Requisites and User Agreement via a rich-text editor.
+-   **Subscriptions:** A tiered subscription model. Users can only have one active plan at a time. Switching plans shows a warning and overwrites the old plan.
+-   **Feedback System:** A mechanism for users to submit feedback.
+-   **Deployment:** The application must be deployable via Docker Compose on Timeweb Cloud.
 
 **User's preferred language**:
 Russian. The next agent MUST respond in Russian.
 
 **what currently exists?**
-A full-stack application with a FastAPI backend, React frontend, and MongoDB. A significant number of features requested by the user in the last two sessions have been implemented.
-
--   **Backend:** Includes full-featured routers for authentication, profiles, admin functions (user management, subscription control, feedback viewing), chat, and matching. Models have been updated to support monthly subscriptions, payment history, and daily communication limits. A new endpoint for submitting feedback exists.
--   **Frontend:**
-    -   **Admin Dashboard:** Has been significantly enhanced with tabs for Users, Subscriptions (with activation), Tariffs (enable/disable), and Feedback.
-    -   **User-facing Pages:** The  page reflects the new per day and per month pricing logic and has updated UI styles. The  page has been reworked with a fixed header/navigation for better usability on both desktop and mobile. The  and registration forms now use a searchable dropdown for selecting a city from a predefined list.
-    -   **New Components:** A  has been created and integrated into the main navigation bar.
--   **Critical Regressions:** The application is currently suffering from critical bugs preventing core user flows. Registration is broken due to a script error, users are unable to log in after registering, and photo uploads on the profile page consistently show error messages, although the operations sometimes succeed in the background.
+A full-stack application with a FastAPI backend, React frontend, and MongoDB. All critical bugs from the previous session (registration, login, photo uploads) have been fixed. The admin panel has been significantly enhanced with a super-admin/admin role system, permission-based access, and a document editor. The UI has been improved with a fixed navigation header, premium filters, and other text/layout changes requested by the user. A test chat between two users exists. Docker files (, ) have been created and iterated upon to support deployment on Timeweb Cloud, which is the current focus.
 
 **Last working item**:
-The agent was actively debugging a set of critical, user-reported bugs that prevent registration, login, and profile photo management.
+The agent was debugging a deployment failure on the user's Timeweb Cloud environment.
 
--   **Last item agent was working:** Diagnosing the Ошибка входа (Login Error) and the Script Error during registration.
-    -   **Reasoning:** The agent successfully determined that the backend authentication logic is correct by testing registration and login via . It found that one specific login failure reported by the user was due to an already-existing email with a different password. For the registration checkbox error, the agent identified that the  handler in the  component might be the cause and implemented a potential fix in . The persistent photo upload errors are still under investigation.
+-   **Last item agent was working:** Diagnosing a Docker build error from the user's deployment logs. The agent correctly identified that the  was failing on the  command because it was trying to copy  from the wrong directory ( instead of the project root).
 -   **Status:** IN PROGRESS
--   **Agent Testing Done:** Y (via curl for backend, but UI flows are broken)
--   **Which testing method agent to use?** Frontend testing agent. Since the core user flows (Registration, Login) are broken on the frontend despite a working backend, the testing agent is required to perform an end-to-end test of the entire registration and login sequence to validate the fixes. Manual  commands are insufficient.
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?** Manual testing by the user. The agent must provide the corrected file and instructions, as it cannot access the external deployment environment.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
 
--   **Issue 1: (P0) Critical Authentication and Registration Flow is Broken**
-    -   **Description:** Users are unable to complete the registration and login flows.
-        -   Clicking the I am 18 checkbox on the registration form triggers a Script Error.
-        -   Users report being unable to log in (Ошибка входа) after successfully registering.
-    -   **Attempted fixes:** The agent modified the  handler in  to . Backend API calls for auth were confirmed to be working correctly, suggesting a frontend-specific problem.
+-   **Issue 1: (P0) Deployment on Timeweb Cloud is Failing**
+    -   **Description:** The user provided logs showing the Docker build process fails during the  step in .
+    -   **Attempted fixes:**
+        1.  Renamed  to .
+        2.  Replaced  with  and updated  to avoid  issues.
+        3.  Fixed a non-critical casing warning ( -> ) in .
+        4.  Correctly diagnosed the final error:  is incorrect because  is in the project root, not in the  directory.
     -   **Next debug checklist:**
-        1.  Use the frontend testing agent to perform a full registration flow to verify if the checkbox fix works.
-        2.  The testing agent must then immediately attempt to log in with the newly created credentials to confirm if the Ошибка входа is resolved or if there's another root cause in the frontend state management () or token handling.
-        3.  Inspect the browser's console and network tab during the entire flow for client-side errors.
-    -   **Why fix this issue and what will be achieved with the fix?** This is a complete blocker for any user interaction with the app. Fixing it will restore the most fundamental functionality.
+        1.  Edit .
+        2.  Find the line .
+        3.  Replace it with the correct paths, copying files from the build context root:
+            
+        4.  Provide the updated  to the user and instruct them to commit the changes and re-run the deployment on Timeweb Cloud.
+    -   **Why fix this issue and what will be achieved with the fix?** This is the final blocker preventing the user from successfully deploying their application on their hosting service.
     -   **Status:** IN PROGRESS
     -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend
+    -   **Should Test frontend/backend/both after fix?** None (User will test deployment).
     -   **Blocked on other issue:** None
 
--   **Issue 2: (P0) Persistent Errors on Profile Photo Management**
-    -   **Description:** When a user uploads a photo, sets a main photo, or saves their profile, the UI displays error banners (Ошибка загрузки, Ошибка установки главного фото, Ошибка сохранения), even though the action sometimes succeeds.
-    -   **Attempted fixes:** The agent added loading states to the UI in  and attempted to add backend validation/compression in . Neither has solved the root cause.
-    -   **Next debug checklist:**
-        1.  In , wrap all  calls (, , ) in  blocks.
-        2.  In the  block, log the full error object () to see the detailed error message from the FastAPI backend.
-        3.  Check the backend logs (  10.64.131.112:58660 - "GET /api/admin/subscription/active-users HTTP/1.1" 200 OK
-INFO:     10.64.131.87:46508 - "GET /api/admin/users HTTP/1.1" 200 OK
-INFO:     10.64.131.112:59712 - "GET /api/admin/feedbacks HTTP/1.1" 200 OK
-INFO:     10.64.131.102:33930 - "GET /api/admin/feedbacks HTTP/1.1" 200 OK
-INFO:     10.64.131.113:38524 - "GET /api/subscriptions/plans HTTP/1.1" 200 OK
-INFO:     10.64.131.113:38538 - "GET /api/subscriptions/my-status HTTP/1.1" 200 OK
-INFO:     10.64.131.113:38538 - "GET /api/subscriptions/plans HTTP/1.1" 200 OK
-INFO:     10.64.131.87:45386 - "GET /api/subscriptions/my-status HTTP/1.1" 200 OK
-INFO:     10.64.131.113:38538 - "GET /api/chat/matches HTTP/1.1" 200 OK
-INFO:     10.64.131.102:33938 - "GET /api/chat/matches HTTP/1.1" 200 OK
-INFO:     10.64.131.113:38538 - "GET /api/chat/17d38f0d-6fc4-466b-901f-29f3d50124bd/info HTTP/1.1" 200 OK
-INFO:     10.64.131.112:42982 - "GET /api/chat/17d38f0d-6fc4-466b-901f-29f3d50124bd/messages HTTP/1.1" 200 OK
-INFO:     10.64.131.102:33938 - "GET /api/chat/17d38f0d-6fc4-466b-901f-29f3d50124bd/info HTTP/1.1" 200 OK
-INFO:     10.64.131.112:42982 - "GET /api/chat/17d38f0d-6fc4-466b-901f-29f3d50124bd/messages HTTP/1.1" 200 OK
-INFO:     10.64.131.102:33938 - "GET /api/chat/17d38f0d-6fc4-466b-901f-29f3d50124bd/messages HTTP/1.1" 200 OK
-INFO:     10.64.131.102:33938 - "GET /api/chat/matches HTTP/1.1" 200 OK
-INFO:     10.64.131.112:42982 - "GET /api/chat/matches HTTP/1.1" 200 OK
-INFO:     10.64.131.113:54070 - "GET /api/chat/matches HTTP/1.1" 200 OK
-INFO:     10.64.131.112:42986 - "GET /api/chat/matches HTTP/1.1" 200 OK) simultaneously while attempting an upload to see if any server-side exceptions occur. The issue might be related to file size limits, base64 encoding, or Pydantic model validation.
-    -   **Why fix this issue and what will be achieved with the fix?** This provides a very poor user experience and undermines trust in the application's functionality.
-    -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Both
-
--   **Issue 3: (P1) Chat UI/UX requires further improvement**
-    -   **Description:** The user is still not satisfied with the chat usability.
-        -   The fixed header/navigation does not work correctly on all screen sizes, getting cut off during scrolling.
-        -   There is no way to view a user's full profile by clicking on their avatar/name in the chat.
-        -   Real-time notifications for new messages are not implemented.
-    -   **Next debug checklist:**
-        1.  For scrolling: Review the CSS in . The main container probably needs  and the message list container needs .
-        2.  For viewing profiles: Implement a modal that fetches and displays user data when their avatar in  or  is clicked.
-        3.  For notifications: This is a larger task. The WebSocket connection in  and  needs to be enhanced to push unread count updates to the  page.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend
-
 **In progress Task List**:
--   None. All work is currently classified under bug fixes.
+-   None.
 
 **Upcoming and Future Tasks**
--   **(P0) Full WebRTC Integration:** Replace  with a real WebRTC implementation.
--   **(P1) Payment Gateway Integration (Ю-касса):** Integrate YooKassa to handle real subscription payments.
--   **(P1) Email Service Integration:** Implement an email service for registration confirmation and password resets.
+-   **(P0) Full WebRTC Integration:** Provide the user with step-by-step bash commands to install and configure a COTURN server on their Yandex Cloud VM (IP: ). Then, integrate the TURN server credentials into the frontend.
+-   **(P1) Payment Gateway Integration (Ю-касса):** Use  to get the integration plan for YooKassa. Ask the user for the required credentials (, ) and implement the payment flow.
+-   **(P1) Full Email Service Integration:** The user has provided SMTP credentials for . The current  is a placeholder. It needs to be fully integrated into the registration flow (send confirmation email) and a new password recovery flow needs to be created.
 -   **(P2) Admin Panel - Payment History:** Implement a view in the admin panel to show a user's full payment history.
 -   **(P2) Admin Panel - Totals:** Add total sums below sortable columns in the admin panel (e.g., total complaints).
--   **(P2) Desktop-Responsive Design:** Continue adapting the mobile-first UI for a better desktop experience.
--   **(P3) Seed Data Localization:** Change English city names (e.g., Moscow) in  to Russian (Москва) to match the UI.
+-   **(P2) Performance for Russian Users:** The user noted slow loading times. While backend/frontend optimizations have been made and deploying to a Russian server will help, continue to monitor and optimize performance.
+-   **(P3) Seed Data Localization:** Change English city names (e.g., Moscow) in  to Russian (Москва).
 
 **Completed work in this session**
--   **Admin Panel Major Overhaul:**
-    -   New tab to view users with active subscriptions, showing plan details and activation/expiry dates.
-    -   Functionality to manually activate a subscription plan for a user.
-    -   New tab to enable/disable subscription tariffs globally.
-    -   Columns for Registration Date and Last Login added to the user list.
--   **Subscription Logic Rework:**
-    -   Backend and frontend updated to handle subscriptions granting a number of communications *per day*, with monthly billing.
-    -   Subscription page UI text and design updated to reflect new logic and user feedback (e.g., button gradients removed, Серебро plan background fixed).
--   **Registration & Profile Overhaul:**
-    -   Replaced the free-text City input with a searchable dropdown list of Russian cities.
-    -   Standardized Smoking Preference options between the registration form and search filters.
--   **Chat UI Improvements:**
-    -   Implemented a fixed header and navigation bar in the chat view for improved usability.
-    -   User avatars are now displayed in the chat list () and chat header ().
--   **Feedback System:**
-    -   A Связь (Feedback) button was added to the main navigation.
-    -   A modal allows users to submit feedback.
-    -   A new tab in the Admin Panel allows admins to view submitted feedback.
--   **Bug Fixes:**
-    -   Fixed a server crash related to sorting chats with different date formats.
-    -   Fixed the Create Demo Match button for the admin account.
+-   **Critical Bug Fixes & Performance:**
+    -   Fixed Script Error during registration.
+    -   Fixed login errors and improved error messages.
+    -   Implemented backend support for HEIC/HEIF image formats.
+    -   Dramatically optimized the admin user list endpoint, reducing load time from ~0.6s to ~0.05s.
+    -   Optimized admin dashboard frontend to load data for the active tab only, improving initial load speed.
+-   **Admin & Role Management:**
+    -   Implemented a robust role system: protected super-admin, and appointed admins.
+    -   Fixed a critical bug preventing appointed admins from accessing the admin panel.
+    -   Implemented permission-based filtering of tabs in the admin panel for appointed admins.
+-   **New Features:**
+    -   Added a Documents tab for the super-admin to edit site-wide legal texts (Requisites, User Agreement) using a simple HTML editor. These are displayed in a new site footer.
+    -   Added premium search filters (Height, Weight, Education) that are only visible to users with an active subscription.
+    -   Added the Education field to the profile editing page.
+-   **UI/UX & Content:**
+    -   Implemented a fixed (sticky) top navigation bar across the site.
+    -   Added a confirmation modal when switching subscription plans.
+    -   Added a favicon.
+    -   Updated text on the landing and subscription pages as requested.
+-   **Deployment & Setup:**
+    -   Created and configured , , , and  to prepare the project for deployment on Timeweb Cloud.
+-   **Testing:**
+    -   Created a persistent chat between  and  for testing purposes and reset their passwords to .
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1: React Error Objects are not valid as a React child**
-    -   **Why to solve this issue and what will be achieved with this?** This is a critical React rendering error that can break the frontend. While it hasn't appeared in this session, it was a recurring issue previously and may still exist in an untested code path.
-    -   **Is recurring issue?** Y
+-   None.
+
+**Known issue recurrence from previous fork**
+-   None. The critical recurring issues from the previous fork (auth, photo uploads) have been definitively resolved and tested.
 
 **Code Architecture**
 
 
+**Key Technical Concepts**
+-   **Stack:** FastAPI (Python), React (JavaScript), MongoDB.
+-   **Deployment:** Docker, Docker Compose, Nginx (as a reverse proxy for the React app).
+-   **Authentication:** JWT-based.
+-   **Admin:** Role-Based Access Control (RBAC) with super-admin and admin roles, with permissions stored in the user document.
+-   **Performance:** Frontend lazy loading of tab data and backend query optimization to improve admin panel speed.
+-   **Image Processing:** Server-side conversion of HEIC/HEIF files to JPEG using Pillow.
+
 **key DB schema**
--   : {..., : str, : datetime, : int}
--   : {user_id, name, city, photos, ...}
--   : {user_id, plan_name, amount, payment_date} (New, in  as )
--   : {plan_name, price, enabled}
--   : {user_id, type, message, created_at}
+-   : {..., : bool, : bool, : List[str]}
+-   : {_id, : str (e.g., requisites), : str (HTML)}
 
 **All files of reference**
--   **/app/frontend/src/pages/AdminDashboard.js**: Overhauled to add new tabs and functionality for managing subscriptions, tariffs, and feedback.
--   **/app/frontend/src/pages/Chat.js**: Overhauled to implement a fixed header/footer for better usability.
--   **/app/frontend/src/pages/Subscriptions.js**: Overhauled to reflect new per day subscription logic and UI feedback.
--   **/app/frontend/src/pages/Profile.js**: Modified to use a searchable city dropdown and is the source of the persistent photo upload errors.
--   **/app/frontend/src/pages/CompleteProfile.js**: Modified to use the new city dropdown for registration.
--   **/app/frontend/src/components/modals/RegisterModal.js**: Contains the registration form logic and the Script Error bug.
--   **/app/backend/routers/admin_router.py**: Heavily modified to provide backend support for new admin features.
--   **/app/backend/routers/profile_router.py**: Contains the photo upload logic that is failing.
--   **/app/backend/models.py**: Updated with several new fields to support new subscription and user data.
+-   **/app/docker-compose.yaml**: Defines the services (frontend, backend, mongo) for deployment. The current focus of debugging.
+-   **/app/Dockerfile.frontend**: Defines the multi-stage build for the React app. Contains the error that needs to be fixed.
+-   **/app/env.production**: The environment file used by Docker Compose during deployment.
+-   **/app/frontend/src/pages/AdminDashboard.js**: Contains all logic for the admin panel, including role checks, tab filtering, and the new document editor.
+-   **/app/backend/routers/admin_router.py**: Contains the API endpoints for user management, role assignment, and optimized data fetching.
+-   **/app/DOCKER_README.md**: Instructions for the user on how to deploy the application.
+
+**Areas that need refactoring**:
+-   The  is currently a placeholder and needs to be implemented fully.
+
+**key api endpoints**
+-   : Assign admin role and permissions.
+-   : Optimized endpoint to fetch all users for the admin panel.
+-   : Fetch content for legal documents.
+-   : Update content for legal documents (super-admin only).
 
 **Critical Info for New Agent**
--   **PRIORITY 1:** The application is not usable for new users due to critical bugs in the registration and login flow. You must fix these first.
--   **PRIORITY 2:** The photo upload functionality has been a recurring problem and needs a definitive fix. Focus on capturing and analyzing the specific error returned from the backend.
--   The user has a very sharp eye for UI/UX details. The chat scrolling issue is a recurring complaint and needs to be solved permanently.
--   The backend authentication API is confirmed to be working. The auth bugs are almost certainly on the frontend (state management, request handling, or UI components).
+-   Your immediate task is to fix the  as described in the Pending Issues section. This is the top priority.
+-   After providing the Dockerfile fix, you must address the user's questions about integrations:
+    1.  **WebRTC:** Provide clear, step-by-step commands to install a COTURN server on a fresh Ubuntu VM on Yandex Cloud.
+    2.  **YooKassa:** Explain what credentials are needed (, ) and where the user can find them in their YooKassa dashboard.
+    3.  **Email:** Explain that the credentials are set up, and the next step is to build the password reset feature and add email confirmation to the registration flow.
+-   The user is deploying to . When asked for values like , you should use .
+
+**documents and test reports created in this job**
+-   /app/Dockerfile.backend
+-   /app/Dockerfile.frontend
+-   /app/docker-compose.yaml
+-   /app/nginx.conf
+-   /app/env.production
+-   /app/DOCKER_README.md
+
+**Last 10 User Messages and any pending HUMAN messages**
+1.  **User:** Provides new deployment logs.
+2.  **Agent:** Identifies a warning ( vs ) and asks for full logs.
+3.  **User:** Provides the rest of the logs showing the build failure.
+4.  **Agent:** Correctly identifies the error:  has an incorrect path for . (This is where the session ends before the fix is applied).
+5.  **User:** Asks if the data in  is correct and relevant.
+6.  **Agent:** Explains each variable in the file, noting which ones the user needs to fill in () or change ().
+7.  **User:** Provides deployment failure logs.
+8.  **Agent:** Analyzes logs, identifies the platform requires  extension and a root  file, and makes changes.
+9.  **User:** Reports that  is not in the repository root.
+10. **Agent:** Realizes  is in  and pivots to using a non-ignored  file, updating docker-compose to use it.
 
 **Project Health Check:**
--   **Broken:** Core user lifecycle is broken (Registration, Login). Profile editing (photo uploads) is functionally broken from a UX perspective.
--   **Mocked:** WebRTC video streaming, YooKassa payments, and email services are still placeholders.
+-   **Broken:** Production deployment on Timeweb Cloud.
+-   **Mocked:** WebRTC video streaming, YooKassa payments, and functional email service (registration/password reset).
 
 **3rd Party Integrations**
--   **WebRTC:** Planned, not integrated.
--   **YooKassa (Ю-касса):** Planned, not integrated.
--   **Email Service (unspecified):** Planned, not integrated.
+-   **Pillow / pillow-heif:** Integrated and working for image processing.
+-   **WebRTC (COTURN):** Planned. User has a server ready (IP: ) and is awaiting setup instructions for Yandex Cloud.
+-   **YooKassa (Ю-касса):** Planned. The agent needs to guide the user on what credentials to provide.
+-   **Email (Yandex SMTP):** Partially integrated. Credentials are in , but the service logic for sending emails on registration/password reset is not yet implemented.
+
+**Testing status**
+-   Testing agent used after significant changes: Yes
+-   Troubleshoot agent used after agent stuck in loop: No
+-   Test files created: None
+-   Known regressions: None
 
 **Credentials to test flow:**
--   **Admin:**  / 
--   **User 1 (Alice):**  / 
--   **User 2 (Bob):**  / 
--   (As documented in )
-</analysis>
+-   **Super Admin:**  / 
+-   **User 1 (Admin):**  /  (has been assigned admin rights)
+-   **User 2:**  / 
+-   A chat exists between Bob and Alice for testing.
+
+**What agent forgot to execute**
+The agent correctly identified the final fix needed for the Docker deployment issue (correcting the  path for  in ) but the session ended before it could execute the  or  tool to apply the fix.</analysis>
