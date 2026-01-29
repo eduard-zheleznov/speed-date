@@ -1,7 +1,6 @@
 version: "3.9"
 
 services:
-  # Frontend (React + Nginx) - ПЕРВЫЙ сервис для проксирования на основной домен
   frontend:
     build:
       context: .
@@ -13,16 +12,8 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      backend:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+      - backend
 
-  # Backend API (FastAPI)
   backend:
     build:
       context: .
@@ -38,16 +29,8 @@ services:
       - DB_NAME=speed_date
       - CORS_ORIGINS=*
     depends_on:
-      mongodb:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/api/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - mongodb
 
-  # MongoDB Database
   mongodb:
     image: mongo:7
     container_name: speeddate-mongodb
@@ -56,9 +39,3 @@ services:
       - "27017:27017"
     environment:
       - MONGO_INITDB_DATABASE=speed_date
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
