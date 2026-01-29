@@ -1,17 +1,22 @@
-# Frontend Dockerfile
-FROM node:20-alpine AS build
+# Frontend Dockerfile  
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
 # Copy package.json
 COPY frontend/package.json ./package.json
 
-# Install dependencies and fix ajv compatibility issue
+# Install dependencies
+# 1. First install all deps
+# 2. Then fix ajv compatibility by reinstalling specific versions
+# 3. Downgrade react-router-dom to v6 which works with Node 18
 RUN npm cache clean --force && \
     npm install --legacy-peer-deps --no-audit --no-fund && \
-    npm install ajv@8 ajv-keywords@5 --legacy-peer-deps --no-audit --no-fund
+    npm uninstall react-router-dom react-router && \
+    npm install react-router-dom@6.28.0 --legacy-peer-deps --no-audit --no-fund && \
+    npm install ajv@8.12.0 ajv-keywords@5.1.0 --legacy-peer-deps --no-audit --no-fund
 
-# Copy frontend code
+# Copy frontend code  
 COPY frontend/ .
 
 # Build the app
