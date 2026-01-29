@@ -1,13 +1,15 @@
 # Frontend Dockerfile
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Copy package.json
+# Copy package.json and package-lock.json if exists
 COPY frontend/package.json ./package.json
+COPY frontend/package-lock.json* ./
 
-# Install dependencies using npm (more stable for CI/CD)
-RUN npm install --legacy-peer-deps
+# Install dependencies with clean install
+RUN npm cache clean --force && \
+    npm install --legacy-peer-deps --no-audit --no-fund
 
 # Copy frontend code
 COPY frontend/ .
@@ -15,6 +17,8 @@ COPY frontend/ .
 # Build the app
 ARG REACT_APP_BACKEND_URL
 ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
+ENV CI=false
+ENV GENERATE_SOURCEMAP=false
 
 RUN npm run build
 
