@@ -3,12 +3,11 @@ FROM node:18-alpine AS build
 
 WORKDIR /app
 
-# Copy package files
+# Copy package.json only (fresh install without lockfile for compatibility)
 COPY frontend/package.json ./package.json
-COPY frontend/yarn.lock ./yarn.lock
 
 # Install dependencies
-RUN yarn install
+RUN yarn install --network-timeout 100000
 
 # Copy frontend code
 COPY frontend/ .
