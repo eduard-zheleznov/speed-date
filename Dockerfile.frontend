@@ -10,6 +10,9 @@ COPY frontend/yarn.lock ./yarn.lock
 # Install dependencies using yarn
 RUN yarn install --network-timeout 300000
 
+# Remove problematic nested node_modules to fix ajv compatibility
+RUN rm -rf node_modules/fork-ts-checker-webpack-plugin/node_modules
+
 # Copy frontend code  
 COPY frontend/ .
 
@@ -19,6 +22,7 @@ ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
 ENV CI=false
 ENV GENERATE_SOURCEMAP=false
 ENV SKIP_PREFLIGHT_CHECK=true
+ENV DISABLE_FORK_TS_CHECKER=true
 
 RUN yarn build
 
