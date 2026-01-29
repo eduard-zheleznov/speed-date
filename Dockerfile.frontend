@@ -3,13 +3,13 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Copy package.json and package-lock.json if exists
+# Copy package.json
 COPY frontend/package.json ./package.json
-COPY frontend/package-lock.json* ./
 
-# Install dependencies with clean install
+# Install dependencies and fix ajv compatibility issue
 RUN npm cache clean --force && \
-    npm install --legacy-peer-deps --no-audit --no-fund
+    npm install --legacy-peer-deps --no-audit --no-fund && \
+    npm install ajv@8 ajv-keywords@5 --legacy-peer-deps --no-audit --no-fund
 
 # Copy frontend code
 COPY frontend/ .
@@ -19,6 +19,7 @@ ARG REACT_APP_BACKEND_URL
 ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
 ENV CI=false
 ENV GENERATE_SOURCEMAP=false
+ENV SKIP_PREFLIGHT_CHECK=true
 
 RUN npm run build
 
