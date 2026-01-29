@@ -3,11 +3,12 @@ FROM node:18-alpine AS build
 
 WORKDIR /app
 
-# Copy package.json
+# Copy package.json and yarn.lock
 COPY frontend/package.json ./package.json
+COPY frontend/yarn.lock ./yarn.lock
 
-# Install dependencies
-RUN npm install --legacy-peer-deps --no-audit --no-fund
+# Install dependencies using yarn
+RUN yarn install --network-timeout 300000
 
 # Copy frontend code  
 COPY frontend/ .
@@ -19,7 +20,7 @@ ENV CI=false
 ENV GENERATE_SOURCEMAP=false
 ENV SKIP_PREFLIGHT_CHECK=true
 
-RUN npm run build
+RUN yarn build
 
 # Production stage with nginx
 FROM nginx:alpine
