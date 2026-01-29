@@ -35,9 +35,10 @@ const webpackConfig = {
       '@': path.resolve(__dirname, 'src'),
     },
     configure: (webpackConfig) => {
-      // Remove ForkTsCheckerWebpackPlugin to avoid ajv compatibility issues
+      // Remove ForkTsCheckerWebpackPlugin to avoid ajv compatibility issues in production builds
       webpackConfig.plugins = webpackConfig.plugins.filter(plugin => {
-        return plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin';
+        const name = plugin.constructor.name;
+        return name !== 'ForkTsCheckerWebpackPlugin' && name !== 'ESLintWebpackPlugin';
       });
 
       // Disable hot reload completely if environment variable is set
