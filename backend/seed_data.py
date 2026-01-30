@@ -1,4 +1,4 @@
-# Скрипт для создания тестовых пользователей
+# Скрипт для создания начальных данных (супер-админ и тестовые пользователи)
 import asyncio
 import sys
 sys.path.append('/app/backend')
@@ -8,14 +8,44 @@ from auth import get_password_hash
 from datetime import datetime, timezone
 import os
 
-async def seed_database():
-    mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
-    db_name = os.environ.get('DB_NAME', 'test_database')
+async def create_super_admin(db):
+    """Создает супер-админа если его нет"""
+    admin_email = "admin@test.com"
     
-    client = AsyncIOMotorClient(mongo_url)
-    db = client[db_name]
+    existing = await db.users.find_one({"email": admin_email})
+    if existing:
+        print(f"✓ Супер-админ уже существует: {admin_email}")
+        return
     
-    # Test users
+    admin_user = {
+        "id": "super-admin-1",
+        "email": admin_email,
+        "name": "Администратор",
+        "age": 30,
+        "height": 175,
+        "weight": 70,
+        "gender": "male",
+        "education": "higher",
+        "smoking": "negative",
+        "city": "Москва",
+        "description": "Администратор системы",
+        "photos": [],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "last_login": datetime.now(timezone.utc).isoformat(),
+        "blocked": False,
+        "complaint_count": 0,
+        "profile_completed": True,
+        "password_hash": get_password_hash("admin123"),
+        "is_admin": True,
+        "is_super_admin": True,
+        "admin_permissions": ["users", "subscriptions", "complaints", "documents"]
+    }
+    
+    await db.users.insert_one(admin_user)
+    print(f"✓ Супер-админ создан: {admin_email} / admin123")
+
+async def create_test_users(db):
+    """Создает тестовых пользователей"""
     test_users = [
         {
             "id": "test-user-1",
@@ -27,7 +57,7 @@ async def seed_database():
             "gender": "female",
             "education": "higher",
             "smoking": "negative",
-            "city": "Moscow",
+            "city": "Москва",
             "description": "Люблю путешествия и новые знакомства",
             "photos": [],
             "created_at": datetime.now(timezone.utc).isoformat(),
@@ -35,7 +65,9 @@ async def seed_database():
             "blocked": False,
             "complaint_count": 0,
             "profile_completed": True,
-            "password_hash": get_password_hash("test123")
+            "password_hash": get_password_hash("test123"),
+            "is_admin": False,
+            "is_super_admin": False
         },
         {
             "id": "test-user-2",
@@ -47,7 +79,7 @@ async def seed_database():
             "gender": "male",
             "education": "higher",
             "smoking": "neutral",
-            "city": "Moscow",
+            "city": "Москва",
             "description": "Интересуюсь спортом и технологиями",
             "photos": [],
             "created_at": datetime.now(timezone.utc).isoformat(),
@@ -55,70 +87,41 @@ async def seed_database():
             "blocked": False,
             "complaint_count": 0,
             "profile_completed": True,
-            "password_hash": get_password_hash("test123")
-        },
-        {
-            "id": "test-user-3",
-            "email": "maria@test.com",
-            "name": "Мария",
-            "age": 30,
-            "height": 170,
-            "weight": 60,
-            "gender": "female",
-            "education": "vocational",
-            "smoking": "negative",
-            "city": "Moscow",
-            "description": "Творческая натура, люблю искусство",
-            "photos": [],
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "last_login": datetime.now(timezone.utc).isoformat(),
-            "blocked": False,
-            "complaint_count": 0,
-            "profile_completed": True,
-            "password_hash": get_password_hash("test123")
+            "password_hash": get_password_hash("test123"),
+            "is_admin": False,
+            "is_super_admin": False
         }
     ]
     
-    # Test filters
-    test_filters = [
-        {
-            "user_id": "test-user-1",
-            "age_range": "25-35",
-            "gender_preference": "male",
-            "city": "Moscow",
-            "smoking_preference": "negative",
-            "updated_at": datetime.now(timezone.utc).isoformat()
-        },
-        {
-            "user_id": "test-user-2",
-            "age_range": "25-35",
-            "gender_preference": "female",
-            "city": "Moscow",
-            "smoking_preference": "any",
-            "updated_at": datetime.now(timezone.utc).isoformat()
-        },
-        {
-            "user_id": "test-user-3",
-            "age_range": "25-35",
-            "gender_preference": "male",
-            "city": "Moscow",
-            "smoking_preference": "negative",
-            "updated_at": datetime.now(timezone.utc).isoformat()
-        }
-    ]
+    for user in test_users:
+        existing = await db.users.find_one({"email": user["email"]})
+        if not existing:
+            await db.users.insert_one(user)
+            print(f"✓ Тестовый пользователь создан: {user['email']} / test123")
+        else:
+            print(f"✓ Пользователь уже существует: {user['email']}")
+
+async def seed_database():
+    """Основная функция создания начальных данных"""
+    mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+    db_name = os.environ.get('DB_NAME', 'test_database')
     
-    # Clear existing test data
-    await db.users.delete_many({"id": {"$in": ["test-user-1", "test-user-2", "test-user-3"]}})
-    await db.filters.delete_many({"user_id": {"$in": ["test-user-1", "test-user-2", "test-user-3"]}})
+    print(f"Подключение к MongoDB: {mongo_url}")
+    print(f"База данных: {db_name}")
     
-    # Insert test data
-    await db.users.insert_many(test_users)
-    await db.filters.insert_many(test_filters)
+    client = AsyncIOMotorClient(mongo_url)
+    db = client[db_name]
     
-    print("✓ Тестовые пользователи созданы:")
-    print("  alice@test.com / test123")
-    print("  bob@test.com / test123")
-    print("  maria@test.com / test123")
+    # Создаем супер-админа
+    await create_super_admin(db)
+    
+    # Создаем тестовых пользователей
+    await create_test_users(db)
+    
+    print("\n✓ Начальные данные готовы!")
+    print("  Супер-админ: admin@test.com / admin123")
+    print("  Тест: alice@test.com / test123")
+    print("  Тест: bob@test.com / test123")
     
     client.close()
 
