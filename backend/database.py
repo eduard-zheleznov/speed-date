@@ -21,3 +21,7 @@ feedback_collection = db.feedback
 
 async def close_db():
     client.close()
+
+async def get_db():
+    """Return database instance"""
+    return db
