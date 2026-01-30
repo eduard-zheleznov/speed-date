@@ -142,15 +142,16 @@ async def ice_candidate(sid, data):
 @app.on_event("startup")
 async def startup_event():
     """Создает начальные данные при запуске сервера"""
-    from seed_data import create_super_admin
+    from seed_data import create_super_admin, create_documents
     from database import get_db
     
     try:
         db = await get_db()
         await create_super_admin(db)
-        logger.info("✓ Проверка супер-админа завершена")
+        await create_documents(db)
+        logger.info("✓ Начальные данные проверены")
     except Exception as e:
-        logger.error(f"Ошибка при создании супер-админа: {e}")
+        logger.error(f"Ошибка при создании начальных данных: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
