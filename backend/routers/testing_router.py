@@ -1,11 +1,23 @@
 from fastapi import APIRouter, HTTPException, Depends
 from models import VideoSession, Match
 from auth import get_current_user_id
-from database import users_collection, video_sessions_collection, matches_collection
+from database import users_collection, video_sessions_collection, matches_collection, get_db
 from datetime import datetime, timedelta, timezone
 import uuid
 
 router = APIRouter(prefix="/testing", tags=["testing"])
+
+@router.post("/init-database")
+async def init_database():
+    """Initialize database with super admin - call this after fresh deploy"""
+    from seed_data import create_super_admin
+    
+    try:
+        db = await get_db()
+        await create_super_admin(db)
+        return {"message": "Database initialized successfully", "admin_email": "admin@test.com"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/create-demo-match")
 async def create_demo_match(user_id: str = Depends(get_current_user_id)):
